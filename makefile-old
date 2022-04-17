@@ -14,3 +14,6 @@ CFLAGS = -Wall $(LIB) -c -fno-builtin  \
 
 LDFLAGS =-m elf_i386 -T script/kernel.ld -Map $(BUILD_DIR)/kernel.map -nostdlib
 
+# 编译汇编文件
+${BUILD_DIR}/grub_head.o: boot/grub_head.S
+	$(AS) $(ASFLAGS) $< -o $@ -I ./boot/include/

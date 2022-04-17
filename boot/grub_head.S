@@ -37,7 +37,7 @@ MBOOT_CHECKSUM 		= 	- (MBOOT_HEADER_MAGIC + MBOOT_HEADER_FLAGS)
 
 // 在代码段的起始位置设置符合 Multiboot 规范的标记
 
-.long MBOOT_HEADER_MAGIC 	// GRUB 会通过这个魔数判断该映像是否支持
+.long MBOOT_HEADER_MAGIC   // GRUB 会通过这个魔数判断该映像是否支持
 .long MBOOT_HEADER_FLAGS   // GRUB 的一些加载时选项，其详细注释在定义处
 .long MBOOT_CHECKSUM       // 检测数值，其含义在定义处
 
@@ -51,6 +51,8 @@ start:
     movl (stack_start), %esp   		//设置内核栈地址，按照 multiboot 规范，当需要使用堆栈时，OS 映象必须自己创建一个
     subl %eax, %esp
     movl $0, %ebp 			//帧指针修改为 0
+	movl $0xB8000, %eax
+	movl $0x07560756, (%eax)
 	call kern_entry
 stop:
 	hlt 			 //停机指令，什么也不做，可以降低 CPU 功耗
@@ -63,5 +65,5 @@ next:
 
 .section .data.init
 ENTRY(stack_start)
-    	.long SYMBOL_NAME(init_task_union)+8192
+    	.fill 1024,8,0
 .previous

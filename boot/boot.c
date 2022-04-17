@@ -7,6 +7,7 @@
 
 // 内核栈的栈顶
 uint32_t kern_stack_top;
+void *glb_mboot_ptr;
 extern void start_kernel(void);
 extern void *flush;
 #define PAGE_DIR_TABLE_POS  0x90000
@@ -95,8 +96,30 @@ __init static void gdt_create(void)
 }
 
 // 内核入口函数
+/*
 __init void kern_entry(void)
 {
+    uint8_t *input = (uint8_t *)0xB8000;
+    uint8_t color = (0 << 4) | (15 & 0x0F);
+
+    *input++ = 'H'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = 'o'; *input++ = color;
+    *input++ = ','; *input++ = color;
+    *input++ = ' '; *input++ = color;
+    *input++ = 'O'; *input++ = color;
+    *input++ = 'S'; *input++ = color;
+    *input++ = ' '; *input++ = color;
+    *input++ = 'K'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'r'; *input++ = color;
+    *input++ = 'n'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = '!'; *input++ = color;
+    while(1);
     gdt_create();
 //    while(1) {
 //        i++;
@@ -109,5 +132,33 @@ __init void kern_entry(void)
     kern_stack_top += PAGE_OFFSET;
     asm volatile ("mov %0, %%esp": : "r" (kern_stack_top));
     // 调用内核初始化函数
-    start_kernel();
+    // start_kernel();
+}
+*/
+__init int kern_entry(void)
+{
+    // gdt_create();
+    uint8_t *input = (uint8_t *)0xB8000;
+    // uint8_t color = (0 << 4) | (15 & 0x0F);
+    uint8_t color = 0x07;
+    *input++ = 'H'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = 'o'; *input++ = color;
+    *input++ = ','; *input++ = color;
+    *input++ = ' '; *input++ = color;
+    *input++ = 'O'; *input++ = color;
+    *input++ = 'S'; *input++ = color;
+    *input++ = ' '; *input++ = color;
+    *input++ = 'K'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'r'; *input++ = color;
+    *input++ = 'n'; *input++ = color;
+    *input++ = 'e'; *input++ = color;
+    *input++ = 'l'; *input++ = color;
+    *input++ = '!'; *input++ = color;
+    // start_kernel();
+    while(1);
+    return 0;
 }
