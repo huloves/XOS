@@ -1,51 +1,56 @@
-# target macros
-TARGET := kernel# FILL: target filename
-MAIN_SRC := # FILL: src file which contains `main()`
+#!Makefile
 
-# compile macros
-DIRS := boot # FILL: only the dirs which contain the src files, in this case, `src` should be added
-OBJS := # FILL: only the objects in current dir, and do not include the one contains `main()`
+BUILD_DIR = ./build
+C_SOURCES = $(shell find . -name "*.c")
+C_OBJECTS = $(patsubst %.c, %.o, $(C_SOURCES))
+S_SOURCES = $(shell find . -name "*.s")
+S_OBJECTS = $(patsubst %.s, %.o, $(S_SOURCES))
 
-# intermedia compile macros
-# NOTE: ALL_OBJS are intentionally left blank, no need to fill it
-ALL_OBJS :=
+CC = gcc
+LD = ld
+ASM = nasm
 
-DIST_CLEAN_FILES := $(OBJS)
+C_FLAGS = -I ./include/ -c -fno-builtin -m32 -fno-stack-protector -nostdinc -fno-pic -gdwarf-2
+LD_FLAGS = -m elf_i386 -T ./script/kernel.ld -Map ./build/kernel.map -nostdlib
+ASM_FLAGS = -f elf -g -F stabs
 
-# recursive wildcard
-rwildcard=$(foreach d,$(wildcard $(addsuffix *,$(1))),$(call rwildcard,$(d)/,$(2))$(filter $(subst *,%,$(2)),$(d)))
+all: $(S_OBJECTS) $(C_OBJECTS) link update_image
 
-# default target
-default: show-info all
+.c.o:
+	@echo 编译代码文件 $< ...
+	$(CC) $(C_FLAGS) $< -o $@
 
-# non-phony targets
-$(TARGET): build-subdirs
-	@echo -e "\t" CC $(CCFLAGS) $(ALL_OBJS) $(MAIN_SRC) -o $@
+.s.o:
+	@echo 编译汇编文件 $< ...
+	$(ASM) $(ASM_FLAGS) $<
 
-# phony targets
-.PHONY: all
-all: $(TARGET) find-all-objs build/kernel.bin
-	@echo Target $(TARGET) build finished.
-	cp ./build/kernel.bin ./hdisk/boot/kernel.bin
-	sync
+link:
+	@echo 链接内核文件...
+	$(LD) $(LD_FLAGS) $(S_OBJECTS) $(C_OBJECTS) -o kernel.bin
+
+.PHONY:clean
+clean:
+	$(RM) $(S_OBJECTS) $(C_OBJECTS) kernel.bin
+
+.PHONY:update_image
+update_image:
+	sudo cp kernel.bin ./hdisk/boot/
 	sleep 1
 
-build/kernel.bin: $(ALL_OBJS)
-	@echo ${ALL_OBJS}
-	#nasm -f elf ./boot/grub_head.S -o ./build/grub_head.o
-	${LD} ${LDFLAGS} $(ALL_OBJS) -o $@
+.PHONY:mount_image
+mount_image:
+	sudo mount -o loop ./hd.img ./hdisk/
 
-.PHONY: clean
-clean:
-	cd ./build && rm -f ./*
+.PHONY:umount_image
+umount_image:
+	sudo umount ./hdisk
 
-.PHONY: show-info
-show-info:
-	@echo Building Project
+.PHONY:qemu
+qemu:
+	qemu-system-i386 -serial stdio -drive file=./hd.img,format=raw,index=0,media=disk -m 512
 
-# need to be placed at the end of the file
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-export PROJECT_PATH := $(patsubst %/,%,$(dir $(mkfile_path)))
-export MAKE_INCLUDE=$(PROJECT_PATH)/config/make.global
-export SUB_MAKE_INCLUDE=$(PROJECT_PATH)/config/submake.global
-include $(MAKE_INCLUDE)
+.PHONY:debug
+debug:
+	qemu-system-i386 -serial stdio -S -s -drive file=./hd.img,format=raw,index=0,media=disk -m 512
+	sleep 1
+	gdb ./hd.img
