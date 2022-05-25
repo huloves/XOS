@@ -22,7 +22,7 @@ all: $(S_OBJECTS) $(C_OBJECTS) link update_image
 
 .s.o:
 	@echo 编译汇编文件 $< ...
-	$(ASM) $(ASM_FLAGS) $<
+	$(ASM) $(ASM_FLAGS) $< -o $@
 
 link:
 	@echo 链接内核文件...
@@ -36,6 +36,7 @@ clean:
 update_image:
 	sudo cp kernel.bin ./hdisk/boot/
 	sleep 1
+	sync;sync;sync
 
 .PHONY:mount_image
 mount_image:

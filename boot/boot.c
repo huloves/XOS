@@ -7,19 +7,20 @@
 
 // 内核栈的栈顶
 uint32_t kern_stack_top;
+void* glb_mboot_ptr;
 extern void start_kernel(void);
 extern void *flush;
 #define PAGE_DIR_TABLE_POS  0x90000
 // 内核使用的临时页表和页目录
 // 该地址必须是页对齐的地址，内存 0-640KB 肯定是空闲的
 
-// pgd_t pgd[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
-// pte_t pte[1024] __attribute__ ((__section__ (".data.init")));
-pgd_t pgd[1024];
-pte_t pte[1024];
+pgd_t pgd[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
+pte_t pte[1024] __attribute__ ((__section__ (".data.init")));
+// pgd_t pgd[1024];
+// pte_t pte[1024];
 
 /* 创建gdt描述符 */
-static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high) {
+__init static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high) {
     uint32_t desc_base = (uint32_t)desc_addr;
     struct gdt_desc desc;
     desc.limit_low_word = limit & 0x0000ffff;
@@ -31,7 +32,7 @@ static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_
     return desc;
 }
 
-static void page_create(void)/* reate page*/
+__init static void page_create(void)/* reate page*/
 {
     for (int i = 0; i < 1024; i++) {
         pgd[i].pgd = 0;
@@ -72,7 +73,7 @@ static void page_create(void)/* reate page*/
     return;
 }
 
-static void gdt_create(void)
+__init static void gdt_create(void)
 {
 /* gdt段基址为0x900,把tss放到第4个位置,也就是0x900+0x20的位置 */
 
@@ -96,7 +97,7 @@ static void gdt_create(void)
     asm volatile ("mov %0, %%ax;mov %%ax, %%ss" : : "i" (SELECTOR_K_DATA));
 }
 
-int kern_entry()
+__init int kern_entry()
 {
     gdt_create();
     page_create();
@@ -107,6 +108,7 @@ int kern_entry()
     kern_stack_top += PAGE_OFFSET;
     asm volatile ("mov %0, %%esp": : "r" (kern_stack_top));
     // 调用内核初始化函数
+    // while(1);
     start_kernel();
 	
     return 0;

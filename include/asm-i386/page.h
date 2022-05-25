@@ -7,6 +7,19 @@
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
+
+/*
+ * This handles the memory map.. We could make this a config
+ * option, but too many people screw it up, and too few need
+ * it.
+ *
+ * A __PAGE_OFFSET of 0xC0000000 means that the kernel has
+ * a virtual address space of one gigabyte, which limits the
+ * amount of physical memory you can use to about 950MB. 
+ *
+ * If you want more physical memory than this then see the CONFIG_HIGHMEM4G
+ * and CONFIG_HIGHMEM64G options in the kernel configuration.
+ */
 #define __PAGE_OFFSET		(0xC0000000)
 #define PAGE_OFFSET		((unsigned long)__PAGE_OFFSET)
 /**
@@ -28,6 +41,11 @@
 
 #define __pa(x)			((unsigned long)(x)-PAGE_OFFSET)
 #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
+
+/*
+ * This much address space is reserved for vmalloc() and iomap()
+ * as well as fixmap mappings.
+ */
 #define __VMALLOC_RESERVE	(128 << 20)
 #define VMALLOC_RESERVE		((unsigned long)__VMALLOC_RESERVE)
 #define __MAXMEM		(-__PAGE_OFFSET-__VMALLOC_RESERVE)
