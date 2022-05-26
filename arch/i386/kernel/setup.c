@@ -18,8 +18,8 @@
 
 extern char _text, _etext, _edata, _end, _start;
 
+struct e820map biosmap __attribute__ ((__section__ (".data.init")));
 struct e820map e820;
-struct e820map biosmap;
 
 static void __init add_memory_region(unsigned long long start, unsigned long long size, int type)
 {
@@ -295,33 +295,21 @@ static void __init setup_memory_region(void)
  */
 static void find_max_pfn(void)
 {
-    int count = 0;
-    multiboot_t *mboot_ptr = glb_mboot_ptr;
-    mmap_entry_t *mmap_start_addr = (mmap_entry_t *)mboot_ptr->mmap_addr;
-    mmap_entry_t *mmap_end_addr = (mmap_entry_t *)(mboot_ptr->mmap_addr + mboot_ptr->mmap_length);
-    mmap_entry_t *map_entry;
+    int i;
 
-    max_pfn = 0;
-    for (map_entry = mmap_start_addr; map_entry < mmap_end_addr; map_entry++) {
-        unsigned long start, end, type;
-        e820.map[count].addr = map_entry->base_addr_low;
-        e820.map[count].size = map_entry->length_low;
-        e820.map[count].type = map_entry->type;
-        start = map_entry->base_addr_low;
-        end = start + map_entry->length_low;
-        type = map_entry->type;
-        count++;
-        /* RAM? */
-        if (map_entry->type != E820_RAM)
-            continue;
-        start = PFN_UP(map_entry->base_addr_low);
-        end = PFN_DOWN(map_entry->base_addr_low + map_entry->length_low);
-        if (start >= end)
-            continue;
-        if (end > max_pfn)
-            max_pfn = end;
-    }
-    e820.nr_map = count;
+	max_pfn = 0;
+	for (i = 0; i < e820.nr_map; i++) {
+		unsigned long start, end;
+		/* RAM? */
+		if (e820.map[i].type != E820_RAM)
+			continue;
+		start = PFN_UP(e820.map[i].addr);
+		end = PFN_DOWN(e820.map[i].addr + e820.map[i].size);
+		if (start >= end)
+			continue;
+		if (end > max_pfn)
+			max_pfn = end;
+	}
 }
 
 /*
@@ -334,6 +322,7 @@ static unsigned long find_max_low_pfn(void)
     max_low_pfn = max_pfn;
     if (max_low_pfn > MAXMEM_PFN) {
         max_low_pfn = MAXMEM_PFN;
+		printk("Warning only %ldMB will be used.\n", MAXMEM >> 20);
     }
     return max_low_pfn;
 }
