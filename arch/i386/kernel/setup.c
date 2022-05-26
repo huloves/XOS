@@ -5,6 +5,7 @@
 #include <linux/init.h>
 #include <linux/string.h>
 #include <asm-i386/stdio.h>
+#include <asm-i386/pgtable.h>
 
 #define PFN_UP(x) (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
@@ -330,8 +331,30 @@ static unsigned long find_max_low_pfn(void)
 static unsigned long setup_memory(void)
 {
 	unsigned long bootmap_size, start_pfn, max_low_pfn;
+	
+	/*
+	 * partially used pages are not usable - thus
+	 * we are rounding upwards:
+	 */
 	start_pfn = PFN_UP(__pa(&_end));   //将物理地址向上取整到下一个页面。__end是已载入内核的底端地址，所以start_pfn是第一块可以被用到的物理页面帧的偏移
+	
 	find_max_pfn();   //遍历e820图，查找最高的可用PFN
+	
+	max_low_pfn = find_max_low_pfn();
+
+#ifdef CONFIG_HIGHMEM
+	highstart_pfn = highend_pfn = max_pfn;
+	if (max_pfn > max_low_pfn) {
+		highstart_pfn = max_low_pfn;
+	}
+	printk(KERN_NOTICE "%ldMB HIGHMEM available.\n",
+		pages_to_mb(highend_pfn - highstart_pfn));
+#endif
+	printk("%ldMB LOWMEM available.\n",
+			pages_to_mb(max_low_pfn));
+	/*
+	 * Initialize the boot-time allocator (with low memory only):
+	 */
 }
 
 void show_memory_map()
