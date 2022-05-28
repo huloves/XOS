@@ -337,6 +337,7 @@ static unsigned long setup_memory(void)
 	 * we are rounding upwards:
 	 */
 	start_pfn = PFN_UP(__pa(&_end));   //将物理地址向上取整到下一个页面。__end是已载入内核的底端地址，所以start_pfn是第一块可以被用到的物理页面帧的偏移
+	printk("start_pfn = 0x%x\n", start_pfn);
 	
 	find_max_pfn();   //遍历e820图，查找最高的可用PFN
 	
@@ -355,6 +356,7 @@ static unsigned long setup_memory(void)
 	/*
 	 * Initialize the boot-time allocator (with low memory only):
 	 */
+	bootmap_size = init_bootmem(start_pfn, max_low_pfn);
 }
 
 void show_memory_map()
@@ -384,4 +386,5 @@ void setup_arch(void)
 
 	show_memory_map();
 	setup_memory_region();
+	max_low_pfn = setup_memory();
 }

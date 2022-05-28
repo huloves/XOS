@@ -239,4 +239,4 @@ static inline bool elem_find(struct list_head *head, struct list_head *elem) {
     return false;
 }
 
-#endif /* __KERNEL__ || _LVM_H_INCLUDE */
+#endif /* _LINUX_LIST_H */

@@ -1,6 +1,8 @@
 #ifndef _LINUX_BOOTMEM_H
 #define _LINUX_BOOTMEM_H
 
+#include <linux/init.h>
+
 /**
  * simple boot-time physical memory area allocator.
  * 简单的启动时物理内存区域分配器。
@@ -13,7 +15,7 @@ extern unsigned long max_pfn;
 /*
  * node_bootmem_map is a map pointer - the bits represent all physical
  * memory pages (including holes) on the node.
- * node_bootmem_map 是一个指向映射映射的指针 - 映射的位代表节点上的所有物理内存页（包括空洞）
+ * node_bootmem_map 是一个指向映射的指针 - 映射的位代表节点上的所有物理内存页（包括空洞）
  */
 typedef struct bootmem_data {
 	unsigned long node_boot_start;
@@ -23,4 +25,7 @@ typedef struct bootmem_data {
 	unsigned long last_pos;
 } bootmem_data_t;
 
-#endif
+// extern unsigned long __init init_bootmem (unsigned long addr, unsigned long memend);
+unsigned long __init init_bootmem (unsigned long start, unsigned long pages);
+
+#endif /* _LINUX_BOOTMEM_H */

@@ -1,5 +1,6 @@
 #ifndef __LINUX_SPINLOCK_H
 #define __LINUX_SPINLOCK_H
+
 #include <asm-i386/system.h>
 #include <asm-i386/bitops.h>
 #include <asm-i386/atomic.h>
@@ -59,4 +60,5 @@ typedef struct {
 
 typedef struct { } rwlock_t;
 #define RW_LOCK_UNLOCKED (rwlock_t) { }
-#endif
+
+#endif /* __LINUX_SPINLOCK_H */

@@ -3,4 +3,4 @@
 
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
 
-#endif
+#endif /* _I386_PGTABLE_H */

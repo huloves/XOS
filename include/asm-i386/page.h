@@ -67,4 +67,4 @@ typedef struct { unsigned long pgprot; } pgprot_t;
 #define VALID_PAGE(page)	((page - mem_map) < max_mapnr)
 #define virt_to_page(kaddr)	(mem_map + (__pa(kaddr) >> PAGE_SHIFT))
 
-#endif
+#endif /* _I386_PAGE_H */

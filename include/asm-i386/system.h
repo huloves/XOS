@@ -50,4 +50,4 @@
 		"movl %0,%%" #seg "\n"		\
 		: :"m" (*(unsigned int *)&(value)))
 
-#endif //CODE_SYSTEM_H
+#endif /* __ASM_SYSTEM_H */

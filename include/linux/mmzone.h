@@ -135,8 +135,8 @@ typedef struct pglist_data {
 	struct pglist_data *node_next;
 } pg_data_t;
 
-// extern int numnodes;
-// extern pg_data_t *pgdat_list;
+extern int numnodes;
+extern pg_data_t *pgdat_list;
 
 // #define memclass(pgzone, classzone)	(((pgzone)->zone_pgdat == (classzone)->zone_pgdat) \
 // 			&& ((pgzone) <= (classzone)))
@@ -151,7 +151,7 @@ typedef struct pglist_data {
 //   unsigned long *zones_size, unsigned long paddr, unsigned long *zholes_size,
 //   struct page *pmap);
 
-// extern pg_data_t contig_page_data;
+extern pg_data_t contig_page_data;
 
 /**
  * for_each_pgdat - helper macro to iterate over all nodes

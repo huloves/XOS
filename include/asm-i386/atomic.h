@@ -10,7 +10,7 @@
 #define LOCK "lock ; "
 #else
 #define LOCK ""
-#endif
+#endif /* CONFIG_SMP */
 
 /*
  * Make sure gcc doesn't try to be clever and move things around
@@ -193,4 +193,4 @@ __asm__ __volatile__(LOCK "andl %0,%1" \
 __asm__ __volatile__(LOCK "orl %0,%1" \
 : : "r" (mask),"m" (*addr) : "memory")
 
-#endif
+#endif /* __ARCH_I386_ATOMIC__ */

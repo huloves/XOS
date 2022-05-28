@@ -107,4 +107,5 @@ static __inline__ void __change_bit(int nr, volatile void * addr)
 }
 
 #define test_bit(nr,addr) constant_test_bit((nr),(addr))
-#endif
+
+#endif /* _I386_BITOPS_H */
