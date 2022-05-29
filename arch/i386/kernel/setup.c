@@ -378,6 +378,7 @@ static unsigned long find_max_low_pfn(void)
 
 static unsigned long setup_memory(void)
 {
+	printk("setup_memory start.\n");
 	unsigned long bootmap_size, start_pfn, max_low_pfn;
 	
 	/*
@@ -407,6 +408,23 @@ static unsigned long setup_memory(void)
 	bootmap_size = init_bootmem(start_pfn, max_low_pfn);
 
 	register_bootmem_low_pages(max_low_pfn);
+
+	/*
+	 * Reserve the bootmem bitmap itself as well. We do this in two
+	 * steps (first step was init_bootmem()) because this catches
+	 * the (very unlikely) case of us accidentally initializing the
+	 * bootmem allocator with an invalid RAM area.
+	 */
+	reserve_bootmem(HIGH_MEMORY, 
+					(PFN_PHYS(start_pfn) + bootmap_size + PAGE_SIZE - 1) - (HIGH_MEMORY));   // 把内核和 bootmem位图 所占的内存标记为“保留”，HIGH_MEMORY为1MB，即内核开始的地方
+
+	/*
+	 * reserve physical page 0 - it's a special BIOS page on many boxes,
+	 * enabling clean reboots, SMP operation, laptop functions.
+	 */
+	reserve_bootmem(0, PAGE_SIZE);
+	printk("setup_memory down.\n");
+	return max_low_pfn;
 }
 
 void show_memory_map()

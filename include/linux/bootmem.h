@@ -28,5 +28,6 @@ typedef struct bootmem_data {
 // extern unsigned long __init init_bootmem (unsigned long addr, unsigned long memend);
 unsigned long __init init_bootmem (unsigned long start, unsigned long pages);
 void __init free_bootmem (unsigned long addr, unsigned long size);
+void __init reserve_bootmem (unsigned long addr, unsigned long size);
 
 #endif /* _LINUX_BOOTMEM_H */
