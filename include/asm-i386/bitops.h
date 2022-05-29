@@ -34,12 +34,14 @@ static __inline__ unsigned long ffz(unsigned long word)
 
 /**
  * test_and_clear_bit - Clear a bit and return its old value
+ *                      在起始地址为addr的位图中清除第nr位，并返回原来的值，原子操作
  * @nr: Bit to clear
  * @addr: Address to count from
  *
  * This operation is atomic and cannot be reordered.
  * It also implies a memory barrier.
  */
+// #define ADDR (*(volatile long *) addr)
 static __inline__ int test_and_clear_bit(int nr, volatile void * addr)
 {
     int oldbit;

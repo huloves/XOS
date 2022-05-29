@@ -9,7 +9,7 @@
 
 #define PFN_UP(x) (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
-#define PFN_PHYS(x) ((x) << PAGE_SIZE)
+#define PFN_PHYS(x) ((x) << PAGE_SHIFT)
 
 /*
  * Reserved space for vmalloc and iomap - defined in asm/page.h
@@ -314,6 +314,54 @@ static void find_max_pfn(void)
 }
 
 /*
+ * Register fully available low RAM pages with the bootmem allocator.
+ * 注册完全可用的低 RAM 页面。
+ */
+static void __init register_bootmem_low_pages(unsigned long max_low_pfn)
+{
+	printk("register_bootmem_low_pages start.\n");
+	int i;
+	for(i = 0; i < e820.nr_map; i++) {
+		unsigned long curr_pfn, last_pfn, size;
+		/*
+		 * Reserve usable low memory
+		 */
+		if (e820.map[i].type != E820_RAM) {
+			continue;
+		}
+		/*
+		 * We are rounding up the start address of usable memory:
+		 * 对可用内存的起始地址进行向上取整：
+		 */
+		curr_pfn = PFN_UP(e820.map[i].addr);
+		if(curr_pfn >= max_low_pfn) {
+			continue;
+		}
+		/*
+		 * ... and at the end of the usable range downwards:
+		 * 对可用的结束地址进行向下取整：
+		 */
+		last_pfn = PFN_DOWN(e820.map[i].addr + e820.map[i].size);
+
+		if(last_pfn > max_low_pfn) {
+			last_pfn = max_low_pfn;
+		}
+
+		/*
+		 * .. finally, did all the rounding and playing
+		 * around just make the area go away?
+		 */
+		if(last_pfn <= curr_pfn) {
+			continue;
+		}
+
+		size = last_pfn - curr_pfn;
+		free_bootmem(PFN_PHYS(curr_pfn), PFN_PHYS(size));
+	}
+	printk("register_bootmem_low_pages down.\n");
+}
+
+/*
  * Determine low and high memory ranges:
  */
 static unsigned long find_max_low_pfn(void)
@@ -357,6 +405,8 @@ static unsigned long setup_memory(void)
 	 * Initialize the boot-time allocator (with low memory only):
 	 */
 	bootmap_size = init_bootmem(start_pfn, max_low_pfn);
+
+	register_bootmem_low_pages(max_low_pfn);
 }
 
 void show_memory_map()

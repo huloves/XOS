@@ -16,6 +16,8 @@
 #include <linux/string.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/io.h>
+#include <linux/debug.h>
+#include <asm-i386/bitops.h>
 
 unsigned long max_low_pfn;
 unsigned long min_low_pfn;
@@ -53,9 +55,44 @@ static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
 	return mapsize;
 }
 
+static void __init free_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)
+{
+	unsigned long i;
+	unsigned long start;
+	/*
+	 * round down end of usable mem, partially free pages are
+	 * considered reserved.
+	 * 向下取整可用内存的末端，部分空闲页保留
+	 */
+	unsigned long sidx;
+	unsigned long eidx = (addr + size - bdata->node_boot_start) / PAGE_SIZE;
+	unsigned long end = (addr + size) / PAGE_SIZE;
+
+	if (!size) BUG();
+	if (end > bdata->node_low_pfn) {
+		BUG();
+	}
+
+	/*
+	 * Round up the beginning of the address.
+	 */
+	start = (addr + PAGE_SIZE - 1) / PAGE_SIZE;
+	sidx = start - (bdata->node_boot_start / PAGE_SIZE);
+
+	for (i = sidx; i < eidx; i++) {
+		if (!test_and_clear_bit(i, bdata->node_bootmem_map))
+			BUG();
+	}
+}
+
 unsigned long __init init_bootmem (unsigned long start, unsigned long pages)
 {
 	max_low_pfn = pages;
 	min_low_pfn = start;
 	return(init_bootmem_core(&contig_page_data, start, 0, pages));
+}
+
+void __init free_bootmem(unsigned long addr, unsigned long size)
+{
+	return(free_bootmem_core(contig_page_data.bdata, addr, size));
 }
