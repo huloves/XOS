@@ -4,23 +4,29 @@
 #include <linux/multiboot.h>
 #include <asm-i386/page.h>
 #include <asm-i386/print.h>
+#include <asm-i386/pgtable.h>
 
 // 内核栈的栈顶
 uint32_t kern_stack_top;
 void* glb_mboot_ptr;
 extern void start_kernel(void);
 extern void *flush;
+
 #define PAGE_DIR_TABLE_POS  0x90000
+
 // 内核使用的临时页表和页目录
 // 该地址必须是页对齐的地址，内存 0-640KB 肯定是空闲的
 
-pgd_t pgd[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
+pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
+pmd_t pmd0[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 0 - 4M
+pmd_t pmd1[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 4 - 8M
 pte_t pte[1024] __attribute__ ((__section__ (".data.init")));
+
 // pgd_t pgd[1024];
 // pte_t pte[1024];
 
 /* 创建gdt描述符 */
-__init static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high) {
+static struct gdt_desc __init make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high) {
     uint32_t desc_base = (uint32_t)desc_addr;
     struct gdt_desc desc;
     desc.limit_low_word = limit & 0x0000ffff;
@@ -32,22 +38,32 @@ __init static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit,
     return desc;
 }
 
-__init static void page_create(void)/* reate page*/
+static void __init page_create(void)/* reate page*/
 {
     for (int i = 0; i < 1024; i++) {
-        pgd[i].pgd = 0;
+        swapper_pg_dir[i].pgd = 0;
+        pmd0[i].pmd = 0;
+        pmd1[i].pmd = 0;
     }
 
-    pgd[0].pgd = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    pgd[768].pgd = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-   // pgd[1023] = (uint32_t)pgd | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    swapper_pg_dir[0].pgd = (uint32_t)pmd0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    swapper_pg_dir[1].pgd = (uint32_t)pmd1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    swapper_pg_dir[768].pgd = (uint32_t)pmd0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    swapper_pg_dir[769].pgd = (uint32_t)pmd1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    // pgd[1023] = (uint32_t)pgd | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    
     uint32_t phy_addr = 0;
+    // for (int i = 0; i < 1024; i++) {
+    //     pte[i].pte_low = 0;
+    // }
+    //create pmd
     for (int i = 0; i < 1024; i++) {
-        pte[i].pte_low = 0;
+        pmd0[i].pmd = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+        // pte[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+        phy_addr += PAGE_SIZE;
     }
-    //create pte
-    for (int i = 0; i < 1024; i++) {
-        pte[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    for(int i = 0; i < 1024; i++) {
+        pmd1[i].pmd = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
         phy_addr += PAGE_SIZE;
     }
 
@@ -61,7 +77,7 @@ __init static void page_create(void)/* reate page*/
     uint64_t gdt_operand = ((8 * 6 - 1) | ((uint64_t)(uint32_t)0xc0000900 << 16));   // 6个描述符大小
 
     // 设置页表
-    asm volatile ("mov %0, %%cr3" : : "r" (pgd));
+    asm volatile ("mov %0, %%cr3" : : "r" (swapper_pg_dir));
     uint32_t cr0;
     // 启用分页，将 cr0 寄存器的分页位置为 1 就好
     asm volatile ("mov %%cr0, %0" : "=r" (cr0));
@@ -73,7 +89,7 @@ __init static void page_create(void)/* reate page*/
     return;
 }
 
-__init static void gdt_create(void)
+static void __init gdt_create(void)
 {
 /* gdt段基址为0x900,把tss放到第4个位置,也就是0x900+0x20的位置 */
 
@@ -86,8 +102,6 @@ __init static void gdt_create(void)
     *((struct gdt_desc*)0x920) = make_gdt_desc((uint32_t*)0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
     *((struct gdt_desc*)0x928) = make_gdt_desc((uint32_t*)0, 0xfffff, GDT_DATA_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
 
-
-
     /* gdt 16位的limit 32位的段基址 */
     uint64_t gdt_operand = ((8 * 6 - 1) | ((uint64_t)(uint32_t)0x900 << 16));   // 7个描述符大小
     asm volatile ("lgdt %0" : : "m" (gdt_operand));
@@ -97,7 +111,7 @@ __init static void gdt_create(void)
     asm volatile ("mov %0, %%ax;mov %%ax, %%ss" : : "i" (SELECTOR_K_DATA));
 }
 
-__init int kern_entry()
+void __init kern_entry()
 {
     gdt_create();
     page_create();
@@ -110,6 +124,4 @@ __init int kern_entry()
     // 调用内核初始化函数
     // while(1);
     start_kernel();
-	
-    return 0;
 }

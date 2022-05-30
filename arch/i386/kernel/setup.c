@@ -417,6 +417,7 @@ static unsigned long setup_memory(void)
 	 */
 	reserve_bootmem(HIGH_MEMORY, 
 					(PFN_PHYS(start_pfn) + bootmap_size + PAGE_SIZE - 1) - (HIGH_MEMORY));   // 把内核和 bootmem位图 所占的内存标记为“保留”，HIGH_MEMORY为1MB，即内核开始的地方
+	// reserve_bootmem(HIGH_MEMORY, (&_end - 0xc0000000 - &_start + PAGE_SIZE - 1) - (HIGH_MEMORY));   // 把内核和 bootmem位图 所占的内存标记为“保留”，HIGH_MEMORY为1MB，即内核开始的地方
 
 	/*
 	 * reserve physical page 0 - it's a special BIOS page on many boxes,
@@ -455,4 +456,5 @@ void setup_arch(void)
 	show_memory_map();
 	setup_memory_region();
 	max_low_pfn = setup_memory();
+	// paging_init();
 }

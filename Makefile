@@ -23,6 +23,7 @@ all: $(S_OBJECTS) $(C_OBJECTS) link update_image
 .s.o:
 	@echo 编译汇编文件 $< ...
 	$(ASM) $(ASM_FLAGS) $< -o $@
+	# $(CC) $(C_FLAGS) $< -o $@
 
 link:
 	@echo 链接内核文件...
@@ -53,5 +54,3 @@ qemu:
 .PHONY:debug
 debug:
 	qemu-system-i386 -serial stdio -S -s -drive file=./hd.img,format=raw,index=0,media=disk -m 512
-	sleep 1
-	gdb ./hd.img
