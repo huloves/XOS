@@ -1,6 +1,3 @@
-//
-// Created by ljy on 10/24/21.
-//
 #ifndef _I386_PAGE_H
 #define _I386_PAGE_H
 /* PAGE_SHIFT determines the page size */

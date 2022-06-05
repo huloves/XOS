@@ -17,10 +17,14 @@ extern void *flush;
 // 内核使用的临时页表和页目录
 // 该地址必须是页对齐的地址，内存 0-640KB 肯定是空闲的
 
-pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
-pmd_t pmd0[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 0 - 4M
-pmd_t pmd1[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 4 - 8M
+// pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
+// pte_t pte0[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 0 - 4M
+// pte_t pte1[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));   // 4 - 8M
+
+pgd_t pgd[1024] __attribute__((__aligned__(PAGE_SIZE))) __attribute__ ((__section__ (".data.init")));
 pte_t pte[1024] __attribute__ ((__section__ (".data.init")));
+
+unsigned long empty_zero_page[1024];
 
 // pgd_t pgd[1024];
 // pte_t pte[1024];
@@ -41,29 +45,19 @@ static struct gdt_desc __init make_gdt_desc(uint32_t* desc_addr, uint32_t limit,
 static void __init page_create(void)/* reate page*/
 {
     for (int i = 0; i < 1024; i++) {
-        swapper_pg_dir[i].pgd = 0;
-        pmd0[i].pmd = 0;
-        pmd1[i].pmd = 0;
+        pgd[i].pgd = 0;
     }
 
-    swapper_pg_dir[0].pgd = (uint32_t)pmd0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    swapper_pg_dir[1].pgd = (uint32_t)pmd1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    swapper_pg_dir[768].pgd = (uint32_t)pmd0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    swapper_pg_dir[769].pgd = (uint32_t)pmd1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    // pgd[1023] = (uint32_t)pgd | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-    
+    pgd[0].pgd = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    pgd[768].pgd = (uint32_t)pte | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+   // pgd[1023] = (uint32_t)pgd | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
     uint32_t phy_addr = 0;
-    // for (int i = 0; i < 1024; i++) {
-    //     pte[i].pte_low = 0;
-    // }
-    //create pmd
     for (int i = 0; i < 1024; i++) {
-        pmd0[i].pmd = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-        // pte[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
-        phy_addr += PAGE_SIZE;
+        pte[i].pte_low = 0;
     }
-    for(int i = 0; i < 1024; i++) {
-        pmd1[i].pmd = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    //create pte
+    for (int i = 0; i < 1024; i++) {
+        pte[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
         phy_addr += PAGE_SIZE;
     }
 
@@ -77,7 +71,7 @@ static void __init page_create(void)/* reate page*/
     uint64_t gdt_operand = ((8 * 6 - 1) | ((uint64_t)(uint32_t)0xc0000900 << 16));   // 6个描述符大小
 
     // 设置页表
-    asm volatile ("mov %0, %%cr3" : : "r" (swapper_pg_dir));
+    asm volatile ("mov %0, %%cr3" : : "r" (pgd));
     uint32_t cr0;
     // 启用分页，将 cr0 寄存器的分页位置为 1 就好
     asm volatile ("mov %%cr0, %0" : "=r" (cr0));
@@ -88,6 +82,58 @@ static void __init page_create(void)/* reate page*/
     asm volatile ("call %0" : : "m" (flush));
     return;
 }
+
+// static void __init page_create(void)/* reate page*/
+// {
+//     for (int i = 0; i < 1024; i++) {
+//         swapper_pg_dir[i].pgd = 0;
+//         pte0[i].pte_low = 0;
+//         pte1[i].pte_low = 0;
+//     }
+
+//     swapper_pg_dir[0].pgd = (uint32_t)pte0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//     swapper_pg_dir[1].pgd = (uint32_t)pte1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//     swapper_pg_dir[768].pgd = (uint32_t)pte0 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//     swapper_pg_dir[769].pgd = (uint32_t)pte1 | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//     // pgd[1023] = (uint32_t)pgd | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+    
+//     uint32_t phy_addr = 0;
+//     // for (int i = 0; i < 1024; i++) {
+//     //     pte[i].pte_low = 0;
+//     // }
+//     //create pmd
+//     for (int i = 0; i < 1024; i++) {
+//         pte0[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//         // pte[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//         phy_addr += PAGE_SIZE;
+//     }
+//     for(int i = 0; i < 1024; i++) {
+//         pte1[i].pte_low = phy_addr | PAGE_PRESENT | PAGE_WRITE | PAGE_USER;
+//         phy_addr += PAGE_SIZE;
+//     }
+
+//     // 更新全局 multiboot_t 指针
+//     glb_mboot_ptr = (multiboot_t *)((uint32_t)glb_mboot_ptr + PAGE_OFFSET);
+
+//     //set  gs
+//     *((struct gdt_desc*)0x918) = make_gdt_desc((uint32_t*)0xc00b8000, 0x00007, GDT_DATA_ATTR_LOW_DPL0, GDT_ATTR_HIGH);
+
+//     //set gdt
+//     uint64_t gdt_operand = ((8 * 6 - 1) | ((uint64_t)(uint32_t)0xc0000900 << 16));   // 6个描述符大小
+
+//     // 设置页表
+//     asm volatile ("mov %0, %%cr3" : : "r" (swapper_pg_dir));
+//     uint32_t cr0;
+//     // 启用分页，将 cr0 寄存器的分页位置为 1 就好
+//     asm volatile ("mov %%cr0, %0" : "=r" (cr0));
+//     cr0 |= 0x80000000;
+
+//     asm volatile ("mov %0, %%cr0" : : "r" (cr0));
+//     asm volatile ("lgdt %0" : : "m" (gdt_operand));
+//     asm volatile ("call %0" : : "m" (flush));
+//     return;
+// }
+
 
 static void __init gdt_create(void)
 {

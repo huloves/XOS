@@ -1,9 +1,24 @@
 #include <linux/init.h>
+#include <asm-i386/stdio.h>
 #include <asm-i386/page.h>
 #include <linux/bootmem.h>
+#include <asm-i386/pgtable.h>
+#include <asm-i386/processor.h>
+#include <linux/mmzone.h>
+#include <linux/debug.h>
+#include <asm-i386/cpufeature.h>
+#include <asm-i386/io.h>
+#include <asm-i386/dma.h>
 
-static void __init pagetable_init(void)
+pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE)));
+// int a[1024];
+// pgd_t b[1024]__attribute__((__aligned__(PAGE_SIZE)));
+// pgd_t swapper_pg_dir_[1024] __attribute__((__aligned__(PAGE_SIZE)));
+
+static void pagetable_init(void)
 {
+	printk("pagetable_init start.\n");
+	// printk("swapper_pg_dir = %x\n", swapper_pg_dir);
 	unsigned long vaddr, end;
 	pgd_t *pgd, *pgd_base;
 	int i, j, k;
@@ -12,7 +27,79 @@ static void __init pagetable_init(void)
 
 	/*
 	 * This can be zero as well - no problem, in that case we exit
-	 * the loops anyway due to the PTRS_PER_* conditions.
+	 * the loops anyway due to thse PTRS_PER_* conditions.
 	 */
 	end = (unsigned long)__va(max_low_pfn*PAGE_SIZE);
+	pgd_base = swapper_pg_dir;
+	i = __pgd_offset(PAGE_OFFSET);   // PAGE_OFFSET = 0xC0000000，获得地址为 0xC0000000 在 PGD 中的便宜，i=0xc00
+	pgd = pgd_base + i;
+
+	// printk("swapper_pg_dir = %x\n", swapper_pg_dir);
+	for (; i < PTRS_PER_PGD; pgd++, i++) {
+        vaddr = i * PGDIR_SIZE;   // 获得虚拟地址 PDG中 索引为 i 的虚拟地址, vaddr = 0xC0000000
+        if (end && (vaddr >= end)) {
+			break;
+		}
+		pmd = (pmd_t *)pgd;   // 没有中间页目录，就把中间页目录直接映射到总目录
+		if (pmd != pmd_offset(pgd, 0))
+			BUG();
+		
+        for (j = 0; j < PTRS_PER_PMD; pmd++, j++) {
+            vaddr = i*PGDIR_SIZE + j*PMD_SIZE;   // vaddr = 0xC0000000
+            if (end && (vaddr >= end))
+                break;
+            pte_base = pte = (pte_t *) alloc_bootmem_low_pages(PAGE_SIZE);   // 设置中间页目录项，为一个页表（4K）分配空间
+			// printk("pte_base = %x\n", pte_base);
+
+            for (k = 0; k < PTRS_PER_PTE; pte++, k++) {
+                vaddr = i*PGDIR_SIZE + j*PMD_SIZE + k*PAGE_SIZE;   // vaddr = 0xC0000000
+                if (end && (vaddr >= end))
+                    break;
+                *pte = mk_pte_phys(__pa(vaddr), PAGE_KERNEL);   // 宏mk_pte_phys()创建一个页表项，这个页表项的物理地址为__pa(vaddr)。属性PAGE_KERNEL表示只有在内核态才能访问这一页表项
+            }
+            set_pmd(pmd, __pmd(_KERNPG_TABLE + __pa(pte_base)));   // 通过调用set_pmd()把该页表追加到中间页目录中。这个过程一直继续，直到把所有的物理内存都映射到从PAGE_OFFSET开始的虚拟地址空间			// printk("%x\n", pte_offset(pmd, 0));
+			// printk("pte_offset = %x\n", pte_offset(pmd, 0));
+            if (pte_base != pte_offset(pmd, 0)) {
+                BUG();
+            }
+        }
+    }
+	printk("pagetable_init down.\n");
+}
+
+static void zone_sizes_init(void)
+{
+	printk("zone_sizes_init start.\n");
+	unsigned long zones_size[MAX_NR_ZONES] = {0, 0, 0};
+	unsigned int max_dma, high, low;
+
+	max_dma = virt_to_phys((char*)MAX_DMA_ADDRESS) >> PAGE_SHIFT;
+	low = max_low_pfn;
+	
+	if(low < max_dma) {
+		zones_size[ZONE_DMA] = low;
+	} else {
+		zones_size[ZONE_DMA] = max_dma;
+		zones_size[ZONE_NORMAL] = low - max_dma;
+	}
+	// free_area_init(zones_size);
+	printk("zone_sizes_init down.\n");
+}
+
+/*
+ * paging_init() sets up the page tables - note that the first 8MB are
+ * already mapped by head.S.
+ *
+ * This routines also unmaps the page at virtual kernel address 0, so
+ * that we can trap those pesky NULL-reference errors in the kernel.
+ */
+void paging_init(void)
+{
+	printk("paging_init start.\n");
+	pagetable_init();
+	load_cr3(swapper_pg_dir);
+	printk("load_cr3 complete.\n");
+	__flush_tlb_all();
+	printk("paging_init down.\n");
+	// zone_sizes_init();
 }

@@ -1,5 +1,6 @@
 #include <asm-i386/types.h>
 #include <asm-i386/stdio.h>
+#include <linux/init.h>
 
 extern void setup_arch(void);
 

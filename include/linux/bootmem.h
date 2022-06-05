@@ -2,6 +2,7 @@
 #define _LINUX_BOOTMEM_H
 
 #include <linux/init.h>
+#include <asm-i386/page.h>
 
 /**
  * simple boot-time physical memory area allocator.
@@ -29,5 +30,9 @@ typedef struct bootmem_data {
 unsigned long __init init_bootmem (unsigned long start, unsigned long pages);
 void __init free_bootmem (unsigned long addr, unsigned long size);
 void __init reserve_bootmem (unsigned long addr, unsigned long size);
+void * __init __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal);
+
+#define alloc_bootmem_low_pages(x) \
+	__alloc_bootmem((x), PAGE_SIZE, 0)
 
 #endif /* _LINUX_BOOTMEM_H */

@@ -6,6 +6,15 @@
 #include <linux/string.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/pgtable.h>
+#include <asm-i386/processor.h>
+/*
+ * Machine setup..
+ */
+
+char ignore_irq13;
+struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
+
+unsigned long mmu_cr4_features;   // extern in include/asm-i386/processor.h
 
 #define PFN_UP(x) (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
@@ -22,7 +31,7 @@ extern char _text, _etext, _edata, _end, _start;
 struct e820map biosmap __attribute__ ((__section__ (".data.init")));
 struct e820map e820;
 
-static void __init add_memory_region(unsigned long long start, unsigned long long size, int type)
+static void add_memory_region(unsigned long long start, unsigned long long size, int type)
 {
 	int x = e820.nr_map;
 	if(x == E820MAX) {
@@ -35,14 +44,18 @@ static void __init add_memory_region(unsigned long long start, unsigned long lon
 	e820.nr_map++;
 }
 
-static void __init print_memory_map(char *who)
+static void print_memory_map(char *who)
 {
 	int i;
 
 	for (i = 0; i < e820.nr_map; i++) {
-		printk(" %s: 0x%08X - 0x%08X ", who,
+		// printk(" %s: 0x%08X - 0x%08X ", who,
+        //     (uint32_t)e820.map[i].addr,
+        //     (uint32_t)e820.map[i].addr + (uint32_t)e820.map[i].size);
+		printk("base_addr = 0x%08X, length = 0x%08X, type = 0x%X",
             (uint32_t)e820.map[i].addr,
-            (uint32_t)e820.map[i].addr + (uint32_t)e820.map[i].size);
+            (uint32_t)e820.map[i].size,
+            (uint32_t)e820.map[i].type);
 		// printk(" %s: %016Lx - %016Lx ", who,
 			// e820.map[i].addr,
 			// e820.map[i].addr + e820.map[i].size);
@@ -70,7 +83,7 @@ static void __init print_memory_map(char *who)
  * Some e820 responses include overlapping entries.  The following
  * replaces the original e820 map with a new one, removing overlaps.
  * **/
-static int __init sanitize_e820_map(struct e820entry biosmap[], int *pnr_map)
+static int sanitize_e820_map(struct e820entry biosmap[], int *pnr_map)
 {
 	struct change_member {
 		struct e820entry *pbios;   // 指向原始 bios条目 的指针，pointer to original bios entry
@@ -210,7 +223,7 @@ static int __init sanitize_e820_map(struct e820entry biosmap[], int *pnr_map)
 	return 0;
 }
 
-void __init init_biosmap()
+static void init_biosmap()
 {
 	int count = 0;
     multiboot_t *mboot_ptr = glb_mboot_ptr;
@@ -245,7 +258,7 @@ void __init init_biosmap()
  * thinkpad 560x, for example, does not cooperate with the memory
  * detection code.)
  */
-static int __init copy_e820_map(struct e820entry * biosmap, int nr_map)
+static int copy_e820_map(struct e820entry * biosmap, int nr_map)
 {
 	/* Only one memory region (or negative)? Ignore it */
 	if(nr_map < 2) {
@@ -279,7 +292,7 @@ static int __init copy_e820_map(struct e820entry * biosmap, int nr_map)
 	} while(biosmap++, --nr_map);
 }
 
-static void __init setup_memory_region(void)
+static void setup_memory_region(void)
 {
 	char *who = "BIOS-e820";
 	
@@ -317,7 +330,7 @@ static void find_max_pfn(void)
  * Register fully available low RAM pages with the bootmem allocator.
  * 注册完全可用的低 RAM 页面。
  */
-static void __init register_bootmem_low_pages(unsigned long max_low_pfn)
+static void register_bootmem_low_pages(unsigned long max_low_pfn)
 {
 	printk("register_bootmem_low_pages start.\n");
 	int i;
@@ -379,14 +392,14 @@ static unsigned long find_max_low_pfn(void)
 static unsigned long setup_memory(void)
 {
 	printk("setup_memory start.\n");
-	unsigned long bootmap_size, start_pfn, max_low_pfn;
+	unsigned long bootmap_size, start_pfn;
 	
 	/*
 	 * partially used pages are not usable - thus
 	 * we are rounding upwards:
 	 */
 	start_pfn = PFN_UP(__pa(&_end));   //将物理地址向上取整到下一个页面。__end是已载入内核的底端地址，所以start_pfn是第一块可以被用到的物理页面帧的偏移
-	printk("start_pfn = 0x%x\n", start_pfn);
+	// printk("start_pfn = 0x%x\n", start_pfn);
 	
 	find_max_pfn();   //遍历e820图，查找最高的可用PFN
 	
@@ -456,5 +469,7 @@ void setup_arch(void)
 	show_memory_map();
 	setup_memory_region();
 	max_low_pfn = setup_memory();
-	// paging_init();
+	// printk("max_low_pfn = %x\n", max_low_pfn);
+	paging_init();
+	while(1);
 }

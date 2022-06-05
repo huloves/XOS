@@ -70,7 +70,7 @@ next:
 
 section .data.init             ; 未初始化的数据段从这里开始
 stack_start:
-    resb 32768       ; 这里作为内核栈
+    resb 614400       ; 这里作为内核栈
 ; glb_mboot_ptr:           ; 全局的 multiboot 结构体指针
     ; resb 4
 
