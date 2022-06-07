@@ -126,7 +126,7 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		printk("pgdat = %x\n", pgdat);
 		// while(1);
 		// lmem_map = (struct page *) alloc_bootmem_node(pgdat, map_size);
-		lmem_map = (struct page *) alloc_bootmem_low_pages(map_size);
+		lmem_map = (struct page *) alloc_bootmem_node(pgdat, map_size);
 		lmem_map = (struct page *)(PAGE_OFFSET + 
 			MAP_ALIGN((unsigned long)lmem_map - PAGE_OFFSET));
 	}
@@ -246,7 +246,7 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			bitmap_size = (size-1) >> (i+4);
 			bitmap_size = LONG_ALIGN(bitmap_size+1);
 			zone->free_area[i].map = 
-			  (unsigned long *) alloc_bootmem_low_pages(bitmap_size);
+			  (unsigned long *) alloc_bootmem_node(pgdat, bitmap_size);
 		}
 	}
 	printk("123123123123\n");
