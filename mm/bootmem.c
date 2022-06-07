@@ -29,7 +29,7 @@ unsigned long max_pfn;
  * 					   调用一次以设置分配器本身。
  * 返回值：位图大小（以字节为单位）
  */
-static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
+static unsigned long init_bootmem_core (pg_data_t *pgdat,
 	unsigned long mapstart, unsigned long start, unsigned long end)   // init_bootmem_core(&contig_page_data, start, 0, pages)
 {
 	printk("bootmem_data_t init start.\n");
@@ -57,7 +57,7 @@ static unsigned long __init init_bootmem_core (pg_data_t *pgdat,
 	return mapsize;
 }
 
-static void __init free_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)
+static void free_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)
 {
 	unsigned long i;
 	unsigned long start;
@@ -87,7 +87,7 @@ static void __init free_bootmem_core(bootmem_data_t *bdata, unsigned long addr, 
 	}
 }
 
-static void __init reserve_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)
+static void reserve_bootmem_core(bootmem_data_t *bdata, unsigned long addr, unsigned long size)
 {
 	unsigned long i;
 	/*
@@ -126,7 +126,7 @@ static void __init reserve_bootmem_core(bootmem_data_t *bdata, unsigned long add
 /*
  * alignment has to be a power of 2 value.
  */
-static void * __init __alloc_bootmem_core (bootmem_data_t *bdata, 
+static void * __alloc_bootmem_core (bootmem_data_t *bdata, 
 	unsigned long size, unsigned long align, unsigned long goal)
 {
 	unsigned long i, start = 0;
@@ -229,24 +229,24 @@ found:
 	return ret;
 }
 
-unsigned long __init init_bootmem (unsigned long start, unsigned long pages)
+unsigned long init_bootmem (unsigned long start, unsigned long pages)
 {
 	max_low_pfn = pages;
 	min_low_pfn = start;
 	return(init_bootmem_core(&contig_page_data, start, 0, pages));
 }
 
-void __init free_bootmem(unsigned long addr, unsigned long size)
+void free_bootmem(unsigned long addr, unsigned long size)
 {
 	return(free_bootmem_core(contig_page_data.bdata, addr, size));
 }
 
-void __init reserve_bootmem (unsigned long addr, unsigned long size)
+void reserve_bootmem (unsigned long addr, unsigned long size)
 {
 	return(reserve_bootmem_core(contig_page_data.bdata, addr, size));
 }
 
-void * __init __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal)
+void * __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal)
 {
 	pg_data_t *pgdat;
 	void *ptr;
@@ -264,4 +264,16 @@ void * __init __alloc_bootmem (unsigned long size, unsigned long align, unsigned
 	// panic("Out of memory");
 	BUG();
 	return NULL;
+}
+
+void * __alloc_bootmem_node (pg_data_t *pgdat, unsigned long size, unsigned long align, unsigned long goal)
+{
+    void *ptr;
+
+    ptr = __alloc_bootmem_core(pgdat->bdata, size, align, goal);
+    if (ptr)
+        return (ptr);
+   	printk("bootmem alloc of %lu bytes failed!\n", size);
+	BUG();
+    return NULL;
 }

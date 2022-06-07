@@ -9,6 +9,7 @@
 #include <asm-i386/cpufeature.h>
 #include <asm-i386/io.h>
 #include <asm-i386/dma.h>
+#include <linux/mm.h>
 
 pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE)));
 // int a[1024];
@@ -73,7 +74,7 @@ static void zone_sizes_init(void)
 	unsigned long zones_size[MAX_NR_ZONES] = {0, 0, 0};
 	unsigned int max_dma, high, low;
 
-	max_dma = virt_to_phys((char*)MAX_DMA_ADDRESS) >> PAGE_SHIFT;
+	max_dma = virt_to_phys((char*)MAX_DMA_ADDRESS) >> PAGE_SHIFT;   // 低于 16MB 的内存只能用于 DMA，因此，上面这条语句用于存放16MB的页面, MAX_DMA_ADDRESS = 0xC1000000, max_dma = 0x1000
 	low = max_low_pfn;
 	
 	if(low < max_dma) {
@@ -82,7 +83,7 @@ static void zone_sizes_init(void)
 		zones_size[ZONE_DMA] = max_dma;
 		zones_size[ZONE_NORMAL] = low - max_dma;
 	}
-	// free_area_init(zones_size);
+	free_area_init(zones_size);   // 初始化内存管理区并创建内存映射表
 	printk("zone_sizes_init down.\n");
 }
 
@@ -101,5 +102,5 @@ void paging_init(void)
 	printk("load_cr3 complete.\n");
 	__flush_tlb_all();
 	printk("paging_init down.\n");
-	// zone_sizes_init();
+	zone_sizes_init();
 }

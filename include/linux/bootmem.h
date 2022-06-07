@@ -3,6 +3,9 @@
 
 #include <linux/init.h>
 #include <asm-i386/page.h>
+#include <linux/cache.h>
+#include <asm-i386/dma.h>
+#include <linux/mmzone.h>
 
 /**
  * simple boot-time physical memory area allocator.
@@ -27,11 +30,14 @@ typedef struct bootmem_data {
 } bootmem_data_t;
 
 // extern unsigned long __init init_bootmem (unsigned long addr, unsigned long memend);
-unsigned long __init init_bootmem (unsigned long start, unsigned long pages);
-void __init free_bootmem (unsigned long addr, unsigned long size);
-void __init reserve_bootmem (unsigned long addr, unsigned long size);
-void * __init __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal);
+unsigned long init_bootmem (unsigned long start, unsigned long pages);
+void free_bootmem (unsigned long addr, unsigned long size);
+void reserve_bootmem (unsigned long addr, unsigned long size);
+void * __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal);
+void * __alloc_bootmem_node (pg_data_t *pgdat, unsigned long size, unsigned long align, unsigned long goal);
 
+#define alloc_bootmem_node(pgdat, x) \
+	__alloc_bootmem_node((pgdat), (x), SMP_CACHE_BYTES, __pa(MAX_DMA_ADDRESS))
 #define alloc_bootmem_low_pages(x) \
 	__alloc_bootmem((x), PAGE_SIZE, 0)
 
