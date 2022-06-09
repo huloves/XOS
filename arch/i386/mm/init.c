@@ -103,4 +103,5 @@ void paging_init(void)
 	__flush_tlb_all();
 	printk("paging_init down.\n");
 	zone_sizes_init();
+	printk("paging_init down.\n");
 }

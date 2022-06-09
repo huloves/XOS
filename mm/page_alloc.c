@@ -80,9 +80,7 @@ static inline void build_zonelists(pg_data_t *pgdat)
 		}
 		zonelist->zones[j++] = NULL;
 	}
-	printk("123\n");
 }
-
 
 /*
  * Set up the zone data structures:

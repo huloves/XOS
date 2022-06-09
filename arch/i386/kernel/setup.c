@@ -471,5 +471,4 @@ void setup_arch(void)
 	max_low_pfn = setup_memory();
 	// printk("max_low_pfn = %x\n", max_low_pfn);
 	paging_init();
-	while(1);
 }
