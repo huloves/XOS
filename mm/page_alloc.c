@@ -41,13 +41,14 @@ static inline void build_zonelists(pg_data_t *pgdat)
 {
 	int i, j, k;
 
-	for (i = 0; i <= GFP_ZONEMASK; i++) {
+	for (i = 0; i <= GFP_ZONEMASK; i++) {   // 遍历最大可能数量的管理区
 		zonelist_t *zonelist;
 		zone_t *zone;
 
 		zonelist = pgdat->node_zonelists + i;
-		memset(zonelist, 0, sizeof(*zonelist));
+		memset(zonelist, 0, sizeof(*zonelist));   // 获得管理区的 zonelist，并且归零
 
+		// 设置 k 为当前检查过的管理区类型
 		j = 0;
 		k = ZONE_NORMAL;
 		if (i & __GFP_HIGHMEM)
@@ -141,12 +142,12 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		unsigned long size, realsize;
 
 		zone_table[nid * MAX_NR_ZONES + j] = zone;   // 在 zone_table 中记录指向该管理区的指针
-		realsize = size = zones_size[j];
+		realsize = size = zones_size[j];   // 计算管理区的实际大小
 		if (zholes_size)
 			realsize -= zholes_size[j];
 
-		printk("zone(%lu): %lu pages.\n", j, size);
-		// while(1);
+		printk("zone(%lu): %lu pages.\n", j, size);   // 打印提示信息告知在这个管理区中的页面数
+
 		zone->size = size;   // 初始化管理区的其他字段
 		zone->name = zone_names[j];
 		zone->lock = SPIN_LOCK_UNLOCKED;
@@ -182,11 +183,11 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		zone->pages_low = mask*2;
 		zone->pages_high = mask*3;
 
-		zone->zone_mem_map = mem_map + offset;
-		zone->zone_start_mapnr = offset;
-		zone->zone_start_paddr = zone_start_paddr;
+		zone->zone_mem_map = mem_map + offset;   // 记录管理区的第 1 个 struct page 在 mem_map 中的地址
+		zone->zone_start_mapnr = offset;   // 记录 mem_map 中当前管理区起点的索引
+		zone->zone_start_paddr = zone_start_paddr;   // 记录管理区的起始物理地址
 
-		if ((zone_start_paddr >> PAGE_SHIFT) & (zone_required_alignment-1)) {
+		if ((zone_start_paddr >> PAGE_SHIFT) & (zone_required_alignment-1)) {   // 利用伙伴分配器保证管理区已经正确的排列可用（？）
 			printk("BUG: wrong zone alignment, it will crash\n");
 			BUG();
 		}
@@ -196,13 +197,15 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		 * up by free_all_bootmem() once the early boot process is
 		 * done. Non-atomic initialization, single-pass.
 		 */
+		// 初识时，管理区中所有的页面都标记为保留，因为没有办法知道引导内存分配器使用的是哪些页面。
+		// 当引导内存分配器在 free_all_bootmem() 中收回时，未使用页面中的 PG_reserved 会被清除。
 		for (i = 0; i < size; i++) {
 			struct page *page = mem_map + offset + i;   // 获得页面偏移
 			set_page_zone(page, nid * MAX_NR_ZONES + j);   // 页面所在的管理区由页面标志编码
-			set_page_count(page, 0);
-			SetPageReserved(page);
-			INIT_LIST_HEAD(&page->list);
-			if (j != ZONE_HIGHMEM)
+			set_page_count(page, 0);   // 设置计数为 0，因为管理区未被使用
+			SetPageReserved(page);    // 设置保留标志，若页面不再被使用，引导内存分配器将清除该位
+			INIT_LIST_HEAD(&page->list);   // 初始化页表链表头
+			if (j != ZONE_HIGHMEM)    // 如果页面可用且页面在低端内存，设置 page->virtual 字段
 				set_page_address(page, __va(zone_start_paddr));
 			zone_start_paddr += PAGE_SIZE;   // 将 zone_start_paddr 增加一个页面大小，将用于记录下一个管理区的起点
 		}
@@ -247,9 +250,6 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 			  (unsigned long *) alloc_bootmem_node(pgdat, bitmap_size);
 		}
 	}
-	printk("123123123123\n");
-	printk("MMMMMMM\n");
-	// while(1);
 	build_zonelists(pgdat);
 }
 
