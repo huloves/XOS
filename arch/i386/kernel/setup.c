@@ -7,6 +7,9 @@
 #include <asm-i386/stdio.h>
 #include <asm-i386/pgtable.h>
 #include <asm-i386/processor.h>
+#include <linux/ioport.h>
+#include <asm-i386/io.h>
+
 /*
  * Machine setup..
  */
@@ -15,6 +18,9 @@ char ignore_irq13;
 struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
 
 unsigned long mmu_cr4_features;   // extern in include/asm-i386/processor.h
+
+/* For PCI or other memory-mapped resources */
+unsigned long pci_mem_start = 0x10000000;
 
 #define PFN_UP(x) (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
@@ -30,6 +36,95 @@ extern char _text, _etext, _edata, _end, _start;
 
 struct e820map biosmap __attribute__ ((__section__ (".data.init")));
 struct e820map e820;
+
+struct resource standard_io_resources[] = {
+	{ "dma1", 0x00, 0x1f, IORESOURCE_BUSY },
+	{ "pic1", 0x20, 0x3f, IORESOURCE_BUSY },
+	{ "timer", 0x40, 0x5f, IORESOURCE_BUSY },
+	{ "keyboard", 0x60, 0x6f, IORESOURCE_BUSY },
+	{ "dma page reg", 0x80, 0x8f, IORESOURCE_BUSY },
+	{ "pic2", 0xa0, 0xbf, IORESOURCE_BUSY },
+	{ "dma2", 0xc0, 0xdf, IORESOURCE_BUSY },
+	{ "fpu", 0xf0, 0xff, IORESOURCE_BUSY }
+};
+
+#define STANDARD_IO_RESOURCES (sizeof(standard_io_resources)/sizeof(struct resource))
+
+static struct resource code_resource = { "Kernel code", 0x100000, 0 };
+static struct resource data_resource = { "Kernel data", 0, 0 };
+static struct resource vram_resource = { "Video RAM area", 0xa0000, 0xbffff, IORESOURCE_BUSY };
+
+/* System ROM resources */
+#define MAXROMS 6
+static struct resource rom_resources[MAXROMS] = {
+	{ "System ROM", 0xF0000, 0xFFFFF, IORESOURCE_BUSY },
+	{ "Video ROM", 0xc0000, 0xc7fff, IORESOURCE_BUSY }
+};
+
+#define romsignature(x) (*(unsigned short *)(x) == 0xaa55)
+
+static void probe_roms(void)
+{
+	int roms = 1;
+	unsigned long base;
+	unsigned char *romstart;
+
+	request_resource(&iomem_resource, rom_resources+0);
+
+	/* Video ROM is standard at C000:0000 - C7FF:0000, check signature */
+	for (base = 0xC0000; base < 0xE0000; base += 2048) {
+		romstart = bus_to_virt(base);   // 将已经映射的物理内存地址转换为虚拟地址
+		if (!romsignature(romstart))
+			continue;
+		request_resource(&iomem_resource, rom_resources + roms);
+		roms++;
+		break;
+	}
+
+	/* Extension roms at C800:0000 - DFFF:0000 */
+	for (base = 0xC8000; base < 0xE0000; base += 2048) {
+		unsigned long length;
+
+		romstart = bus_to_virt(base);
+		if (!romsignature(romstart))
+			continue;
+		length = romstart[2] * 512;
+		if (length) {
+			unsigned int i;
+			unsigned char chksum;
+
+			chksum = 0;
+			for (i = 0; i < length; i++)
+				chksum += romstart[i];
+
+			/* Good checksum? */
+			if (!chksum) {
+				rom_resources[roms].start = base;
+				rom_resources[roms].end = base + length - 1;
+				rom_resources[roms].name = "Extension ROM";
+				rom_resources[roms].flags = IORESOURCE_BUSY;
+
+				request_resource(&iomem_resource, rom_resources + roms);
+				roms++;
+				if (roms >= MAXROMS)
+					return;
+			}
+		}
+	}
+
+	/* Final check for motherboard extension rom at E000:0000 */
+	base = 0xE0000;
+	romstart = bus_to_virt(base);
+
+	if (romsignature(romstart)) {
+		rom_resources[roms].start = base;
+		rom_resources[roms].end = base + 65535;
+		rom_resources[roms].name = "Extension ROM";
+		rom_resources[roms].flags = IORESOURCE_BUSY;
+
+		request_resource(&iomem_resource, rom_resources + roms);
+	}
+}
 
 static void add_memory_region(unsigned long long start, unsigned long long size, int type)
 {
@@ -441,6 +536,52 @@ static unsigned long setup_memory(void)
 	return max_low_pfn;
 }
 
+/*
+ * Request address space for all standard RAM and ROM resources（请求所有标准RAM和ROM资源的地址空间）
+ * and also for regions reported as reserved by the e820.（也适用于e820 报告的区域。）
+ */
+static void register_memory(unsigned long max_low_pfn)
+{
+	unsigned long low_mem_size;
+	int i;
+	probe_roms();
+	for (i = 0; i < e820.nr_map; i++) {
+		struct resource *res;
+		if (e820.map[i].addr + e820.map[i].size > 0x100000000ULL)
+			continue;
+		res = alloc_bootmem_low(sizeof(struct resource));
+		switch (e820.map[i].type) {
+		case E820_RAM:	res->name = "System RAM"; break;
+		case E820_ACPI:	res->name = "ACPI Tables"; break;
+		case E820_NVS:	res->name = "ACPI Non-volatile Storage"; break;
+		default:	res->name = "reserved";
+		}
+		res->start = e820.map[i].addr;
+		res->end = res->start + e820.map[i].size - 1;
+		res->flags = IORESOURCE_MEM | IORESOURCE_BUSY;
+		request_resource(&iomem_resource, res);
+		if (e820.map[i].type == E820_RAM) {
+			/*
+			 *  We dont't know which RAM region contains kernel data,
+			 *  so we try it repeatedly and let the resource manager
+			 *  test it.
+			 */
+			request_resource(res, &code_resource);
+			request_resource(res, &data_resource);
+		}
+	}
+	request_resource(&iomem_resource, &vram_resource);
+
+	/* request I/O space for devices used on all i[345]86 PCs */
+	for (i = 0; i < STANDARD_IO_RESOURCES; i++)
+		request_resource(&ioport_resource, standard_io_resources+i);
+
+	/* Tell the PCI layer not to allocate too close to the RAM area.. */
+	low_mem_size = ((max_low_pfn << PAGE_SHIFT) + 0xfffff) & ~0xfffff;
+	if (low_mem_size > pci_mem_start)
+		pci_mem_start = low_mem_size;
+}
+
 void show_memory_map()
 {
     uint32_t mmap_addr = ((multiboot_t*)glb_mboot_ptr)->mmap_addr;
@@ -460,6 +601,7 @@ void show_memory_map()
 
 void setup_arch(void)
 {
+	printk("setup_arch start.\n");
 	unsigned long max_low_pfn;
 	
 	printk("kernel in memory start: 0x%08X\n", &_start);
@@ -471,4 +613,6 @@ void setup_arch(void)
 	max_low_pfn = setup_memory();
 	// printk("max_low_pfn = %x\n", max_low_pfn);
 	paging_init();
+	register_memory(max_low_pfn);
+	printk("setup_arch down.\n");
 }

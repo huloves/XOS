@@ -53,11 +53,12 @@
 #define IORESOURCE_MEM_8AND16BIT	(2<<3)
 #define IORESOURCE_MEM_SHADOWABLE	(1<<5)	/* dup: IORESOURCE_SHADOWABLE */
 #define IORESOURCE_MEM_EXPANSIONROM	(1<<6)
+
 struct resource {
-    const char *name;
-    unsigned long start, end;
-    unsigned long flags;
-    struct resource *parent, *sibling, *child;
+    const char *name;   // 资源拥有者的描述
+    unsigned long start, end;   // 资源范围的开始和结束
+    unsigned long flags;   // 各种标志
+    struct resource *parent, *sibling, *child;   // 指向资源数中父亲、兄弟、第一个孩子的指针
 };
 
 struct resource_list {
