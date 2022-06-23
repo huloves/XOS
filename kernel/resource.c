@@ -10,10 +10,11 @@ struct resource iomem_resource = { "PCI mem", 0x00000000, 0xffffffff, IORESOURCE
 static rwlock_t resource_lock = RW_LOCK_UNLOCKED;
 
 /* Return the conflict entry if you can't request it */
+/* 如果无法请求，返回冲突条目 */
 static struct resource * __request_resource(struct resource *root, struct resource *new)
 {
-	unsigned long start = new->start;
-	unsigned long end = new->end;
+	unsigned long start = new->start;   // 获得要插入节点的起始值
+	unsigned long end = new->end;       // 获得要插入节点的结束值
 	struct resource *tmp, **p;
 
 	if (end < start)
@@ -24,8 +25,8 @@ static struct resource * __request_resource(struct resource *root, struct resour
 		return root;
 	p = &root->child;
 	for (;;) {
-		tmp = *p;
-		if (!tmp || tmp->start > end) {
+		tmp = *p;   // 获得根节点的孩子链表的地址
+		if (!tmp || tmp->start > end) {   // 判断孩子链表节点是否为空，和节点是否非法
 			new->sibling = tmp;
 			*p = new;
 			new->parent = root;
