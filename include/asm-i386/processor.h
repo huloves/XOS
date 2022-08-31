@@ -67,6 +67,9 @@ struct cpuinfo_x86 {
  */
 extern struct cpuinfo_x86 boot_cpu_data;
 
+#define cpu_data (&boot_cpu_data)
+#define current_cpu_data boot_cpu_data
+
 extern char ignore_irq13;
 
 /*
@@ -113,6 +116,12 @@ static inline void clear_in_cr4 (unsigned long mask)
 		"movl %%eax,%%cr4\n"
 		: : "irg" (~mask)
 		:"ax");
+}
+
+/* REP NOP (PAUSE) is a good thing to insert into busy-wait loops. */
+static inline void rep_nop(void)
+{
+	__asm__ __volatile__("rep;nop" ::: "memory");
 }
 
 #endif
