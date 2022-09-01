@@ -5,6 +5,8 @@
 #include <asm-i386/atomic.h>
 #include <asm-i386/delay.h>
 #include <asm-i386/segment.h>
+#include <linux/timex.h>
+#include <asm-i386/processor.h>
 
 BUILD_COMMON_IRQ()
 
@@ -355,4 +357,23 @@ void init_IRQ(void)
 		if (vector != SYSCALL_VECTOR)   // 跳过用于系统调用的向量 0x80
 			set_intr_gate(vector, interrupt[i]);
 	}
+
+	/*
+	 * Set the clock to HZ Hz, we already have a valid
+	 * vector now:
+	 */
+	outb_p(0x34,0x43);				/* binary, mode 2, LSB/MSB, ch 0 */
+	outb_p(LATCH & 0xff , 0x40);	/* LSB */
+	outb(LATCH >> 8 , 0x40);		/* MSB */
+
+// #ifndef CONFIG_VISWS
+	// setup_irq(2, &irq2);
+// #endif
+
+	/*
+	 * External FPU? Set up irq13 if so, for
+	 * original braindamaged IBM FERR coupling.
+	 */
+	// if (boot_cpu_data.hard_math && !cpu_has_fpu)
+		// setup_irq(13, &irq13);
 }
