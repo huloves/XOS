@@ -65,7 +65,12 @@ flush:
 next:
     ret
 
+; .section .data.init
+; ENTRY(stack_start)
+; 		.fill 4*1024, 1, 0
+; .previous
+
 .section .data.init
 ENTRY(stack_start)
-		.fill 4*1024, 1, 0
+    	.long SYMBOL_NAME(init_task_union)+8192
 .previous

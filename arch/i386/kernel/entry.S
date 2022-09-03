@@ -97,17 +97,7 @@ ret_with_reschedule:
 	#cmpl $0,sigpending(%ebx)
 	#jne signal_return
 restore_all:
-		popl %ebx;
-    	popl %ecx;
-    	popl %edx;
-    	popl %esi;
-    	popl %edi;
-    	popl %ebp;
-    	popl %eax;
-    1:	popl %ds;
-    2:	popl %es;
-    	addl $4,%esp;
-    3:	iret;
+	RESTORE_ALL
 
 ENTRY(ret_from_intr)
 	GET_CURRENT(%ebx)

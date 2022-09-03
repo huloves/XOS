@@ -8,6 +8,9 @@
 #include <asm-i386/ptrace.h>
 #include <linux/kernel_stat.h>
 #include <asm-i386/signal.h>
+#include <asm-i386/system.h>
+#include <linux/irq_cpustat.h>
+#include <linux/interrupt.h>
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.
@@ -119,9 +122,10 @@ inline void disable_irq_nosync(unsigned int irq)
 int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction * action)
 {
 	int status;
-	int cpu = smp_processor_id();
+	// int cpu = smp_processor_id();
+	int cpu = 0;
 
-	irq_enter(cpu, irq);
+	irq_enter(irq);
 
 	status = 1;	/* Force the "do bottom halves" bit */
 
@@ -133,11 +137,11 @@ int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction *
 		action->handler(irq, action->dev_id, regs);
 		action = action->next;
 	} while (action);
-	if (status & SA_SAMPLE_RANDOM)
-		add_interrupt_randomness(irq);
+	// if (status & SA_SAMPLE_RANDOM)
+		// add_interrupt_randomness(irq);
 	__cli();
 
-	irq_exit(cpu, irq);
+	irq_exit(irq);
 
 	return status;
 }
@@ -159,20 +163,21 @@ asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 	 * 0 return value means that this irq is already being
 	 * handled by some other CPU. (or is disabled)
 	 */
-	int irq = regs.orig_eax & 0xff; /* high bits used in ret_from_ code  */
-	int cpu = smp_processor_id();
+	int irq = regs.orig_eax & 0xff; /* high bits used in ret_from_ code. 获取中断号  */
+	// int cpu = smp_processor_id();
+	int cpu = 0;
 	irq_desc_t *desc = irq_desc + irq;
 	struct irqaction * action;
 	unsigned int status;
 
 	kstat.irqs[cpu][irq]++;
 	spin_lock(&desc->lock);
-	desc->handler->ack(irq);
+	desc->handler->ack(irq);   // 给 8259 芯片发送确认
 	/*
 	   REPLAY is when Linux resends an IRQ that was dropped earlier
 	   WAITING is used by probe to mark irqs that are being tested
 	   */
-	status = desc->status & ~(IRQ_REPLAY | IRQ_WAITING);
+	status = desc->status & ~(IRQ_REPLAY | IRQ_WAITING);   // 中断通道状态的处理和设置
 	status |= IRQ_PENDING; /* we _want_ to handle it */
 
 	/*
@@ -224,7 +229,7 @@ out:
 	desc->handler->end(irq);
 	spin_unlock(&desc->lock);
 
-	if (softirq_active(cpu) & softirq_mask(cpu))
+	if (softirq_active() & softirq_mask())
 		do_softirq();
 	return 1;
 }
