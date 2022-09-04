@@ -3,6 +3,7 @@
 #define _LINUX_INTERRUPT_H
 
 #include <linux/linkage.h>
+#include <asm-i386/ptrace.h>
 
 struct irqaction {
 	void (*handler)(int, void *, struct pt_regs *);

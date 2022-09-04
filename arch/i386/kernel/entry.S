@@ -73,7 +73,7 @@ ENOSYS = 38
 
 ENTRY(ret_from_fork)
 	pushl %ebx
-	call SYMBOL_NAME(schedule_tail)
+	# call SYMBOL_NAME(schedule_tail)
 	addl $4, %esp
 	//GET_CURRENT(%ebx)
 	//testb $0x02,tsk_ptrace(%ebx)	# PT_TRACESYS
@@ -114,11 +114,11 @@ handle_softirq:
 
 	ALIGN
 reschedule:
-	call SYMBOL_NAME(schedule)    # test
+	# call SYMBOL_NAME(schedule)    # test
 	jmp ret_from_sys_call
 
 .data
 ENTRY(sys_call_table)
-	.long SYMBOL_NAME(sys_exit)
-	.long SYMBOL_NAME(sys_fork)
-	.long SYMBOL_NAME(sys_clone)
+#	.long SYMBOL_NAME(sys_exit)
+#	.long SYMBOL_NAME(sys_fork)
+#	.long SYMBOL_NAME(sys_clone)

@@ -4,6 +4,18 @@
 #include <linux/list.h>
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>
+#include <asm-i386/uaccess.h>
+#include <asm-i386/param.h>
+
+#define _STK_LIM	(8*1024*1024)
+#define DEF_COUNTER	(10*HZ/100)	/* 100 ms time slice */
+#define DEF_NICE	(0)
+/*
+ * Scheduling policies
+ */
+#define SCHED_OTHER		0
+#define SCHED_FIFO		1
+#define SCHED_RR		2
 
 void trap_init(void);
 
@@ -147,7 +159,6 @@ struct task_struct {
     thread_group:	(struct list_head)LIST_HEAD_INIT(tsk.thread_group),		\
     keep_capabilities:	0,						\
     comm:		"swapper",					\
-    * sigmask_lock:	SPIN_LOCK_UNLOCKED,				\ */ \
     alloc_lock:		SPIN_LOCK_UNLOCKED				\
 }
 

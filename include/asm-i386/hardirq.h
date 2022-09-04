@@ -14,7 +14,7 @@ typedef struct {
 	unsigned int __nmi_count;	/* arch dependent */
 } ____cacheline_aligned irq_cpustat_t;
 
-#include <linux/irq_cpustat.h>
+extern irq_cpustat_t irq_stat[];
 
 /*
  * Are we in an interrupt context? Either doing bottom half

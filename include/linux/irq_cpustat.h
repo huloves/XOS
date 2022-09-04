@@ -3,7 +3,7 @@
 
 #include <asm-i386/hardirq.h>
 
-extern irq_cpustat_t irq_stat[];
+// extern irq_cpustat_t irq_stat[];
 
 #define __IRQ_STAT(member) (irq_stat[0].member)
 

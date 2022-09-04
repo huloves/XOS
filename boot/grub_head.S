@@ -49,7 +49,7 @@ start:
 	movl %ebx, (glb_mboot_ptr)	//将 ebx 中存储的指针存入 glb_mboot_ptr 变量
 	movl $0xC0000000, %eax
 	movl $0xC0000000, %esp
-    movl STACK_TOP, %esp   		//设置内核栈地址，按照 multiboot 规范，当需要使用堆栈时，OS 映象必须自己创建一个
+	movl (stack_start), %esp 
     subl %eax, %esp
 	andl 0xfffffff0, %esp
     movl $0, %ebp 			//帧指针修改为 0
@@ -65,10 +65,10 @@ flush:
 next:
     ret
 
-; .section .data.init
-; ENTRY(stack_start)
-; 		.fill 4*1024, 1, 0
-; .previous
+// .section .data.init
+// ENTRY(stack_start)
+// 		.fill 4*1024, 1, 0
+// .previous
 
 .section .data.init
 ENTRY(stack_start)

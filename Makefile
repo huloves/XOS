@@ -3,8 +3,8 @@
 BUILD_DIR = ./build
 C_SOURCES = $(shell find . -name "*.c")
 C_OBJECTS = $(patsubst %.c, %.o, $(C_SOURCES))
-S_SOURCES = $(shell find . -name "*.s")
-S_OBJECTS = $(patsubst %.s, %.o, $(S_SOURCES))
+S_SOURCES = $(shell find . -name "*.S")
+S_OBJECTS = $(patsubst %.S, %.o, $(S_SOURCES))
 
 CC = gcc
 LD = ld
@@ -20,10 +20,10 @@ all: $(S_OBJECTS) $(C_OBJECTS) link update_image
 	@echo 编译代码文件 $< ...
 	$(CC) $(C_FLAGS) $< -o $@
 
-.s.o:
+.S.o:
 	@echo 编译汇编文件 $< ...
-	$(ASM) $(ASM_FLAGS) $< -o $@
-	# $(CC) $(C_FLAGS) $< -o $@
+	# $(ASM) $(ASM_FLAGS) $< -o $@
+	$(CC) $(C_FLAGS) $< -o $@
 
 link:
 	@echo 链接内核文件...
