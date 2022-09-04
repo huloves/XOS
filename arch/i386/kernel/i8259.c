@@ -7,6 +7,7 @@
 #include <asm-i386/segment.h>
 #include <linux/timex.h>
 #include <asm-i386/processor.h>
+#include <asm-i386/stdio.h>
 
 BUILD_COMMON_IRQ()
 
@@ -42,8 +43,8 @@ BUILD_16_IRQS(0x8) BUILD_16_IRQS(0x9) BUILD_16_IRQS(0xa) BUILD_16_IRQS(0xb)
 BUILD_16_IRQS(0xc) BUILD_16_IRQS(0xd)
 #endif
 
-#undef BUILD_16_IRQS
-#undef BI
+// #undef BUILD_16_IRQS
+// #undef BI
 
 #define IRQ(x,y) \
 	IRQ##x##y##_interrupt
@@ -343,6 +344,7 @@ void init_ISA_irqs(void)
 
 void init_IRQ(void)
 {
+	printk("init_IRQ start.\n");
 	int i;
 
 	init_ISA_irqs();
@@ -376,4 +378,5 @@ void init_IRQ(void)
 	 */
 	// if (boot_cpu_data.hard_math && !cpu_has_fpu)
 		// setup_irq(13, &irq13);
+	printk("init_IRQ down.\n");
 }

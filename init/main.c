@@ -4,6 +4,7 @@
 #include <linux/sched.h>
 
 extern void setup_arch(void);
+extern void init_IRQ(void);
 
 void start_kernel(void)
 {
@@ -12,5 +13,6 @@ void start_kernel(void)
     printk("init_all.\n");
     setup_arch();
     trap_init();
+    init_IRQ();
     while(1);
 }

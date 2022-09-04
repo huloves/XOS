@@ -48,10 +48,8 @@ start:
 	cli  				//此时还没有设置好保护模式的中断处理，所以必须关闭中断
 	movl %ebx, (glb_mboot_ptr)	//将 ebx 中存储的指针存入 glb_mboot_ptr 变量
 	movl $0xC0000000, %eax
-	movl $0xC0000000, %esp
 	movl (stack_start), %esp 
-    subl %eax, %esp
-	andl 0xfffffff0, %esp
+	subl %eax, %esp
     movl $0, %ebp 			//帧指针修改为 0
 	movl $0xB8000, %eax
 	movl $0x07560756, (%eax)
