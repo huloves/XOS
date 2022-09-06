@@ -8,6 +8,7 @@
 #include <linux/timex.h>
 #include <asm-i386/processor.h>
 #include <asm-i386/stdio.h>
+#include <asm-i386/desc.h>
 
 BUILD_COMMON_IRQ()
 

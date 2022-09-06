@@ -64,7 +64,7 @@ __asm__( \
  */
 
 #define BUILD_IRQ(nr) \
-asmlinkage void IRQ_NAME(nr); \
+void IRQ_NAME(nr); \
 __asm__( \
 "\n"__ALIGN_STR"\n" \
 SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
