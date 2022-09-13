@@ -4,6 +4,11 @@
 
 #include <linux/linkage.h>
 #include <asm-i386/ptrace.h>
+#include <asm-i386/atomic.h>
+#include <asm-i386/bitops.h>
+#include <asm-i386/system.h>
+#include <linux/spinlock.h>
+#include <linux/threads.h>
 
 struct irqaction {
 	void (*handler)(int, void *, struct pt_regs *);
@@ -65,5 +70,79 @@ struct softirq_action
 };
 
 asmlinkage void do_softirq(void);
+
+static inline void __cpu_raise_softirq(int cpu, int nr)
+{
+	softirq_active() |= (1<<nr);
+}
+
+/* Tasklets --- multithreaded analogue of BHs.
+
+   Main feature differing them of generic softirqs: tasklet
+   is running only on one CPU simultaneously.
+
+   Main feature differing them of BHs: different tasklets
+   may be run simultaneously on different CPUs.
+
+   Properties:
+   * If tasklet_schedule() is called, then tasklet is guaranteed
+     to be executed on some cpu at least once after this.
+   * If the tasklet is already scheduled, but its excecution is still not
+     started, it will be executed only once.
+   * If this tasklet is already running on another CPU (or schedule is called
+     from tasklet itself), it is rescheduled for later.
+   * Tasklet is strictly serialized wrt itself, but not
+     wrt another tasklets. If client needs some intertask synchronization,
+     he makes it with spinlocks.
+ */
+
+struct tasklet_struct
+{
+	struct tasklet_struct *next;
+	unsigned long state;
+	atomic_t count;
+	void (*func)(unsigned long);
+	unsigned long data;
+};
+
+enum
+{
+	TASKLET_STATE_SCHED,	/* Tasklet is scheduled for execution */
+	TASKLET_STATE_RUN	/* Tasklet is running (SMP only) */
+};
+
+struct tasklet_head
+{
+	struct tasklet_struct *list;
+} __attribute__ ((__aligned__(SMP_CACHE_BYTES)));
+
+extern struct tasklet_head tasklet_vec[NR_CPUS];
+extern struct tasklet_head tasklet_hi_vec[NR_CPUS];
+
+static inline void tasklet_hi_schedule(struct tasklet_struct *t)
+{
+	if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state)) {
+		int cpu = 0;
+		unsigned long flags;
+
+		local_irq_save(flags);
+		t->next = tasklet_hi_vec[cpu].list;
+		tasklet_hi_vec[cpu].list = t;
+		__cpu_raise_softirq(cpu, HI_SOFTIRQ);
+		local_irq_restore(flags);
+	}
+}
+
+/* Old BH definitions */
+
+extern struct tasklet_struct bh_task_vec[];
+
+/* It is exported _ONLY_ for wait_on_irq(). */
+extern spinlock_t global_bh_lock;
+
+static inline void mark_bh(int nr)
+{
+	tasklet_hi_schedule(bh_task_vec+nr);
+}
 
 #endif /* _LINUX_INTERRUPT_H  */

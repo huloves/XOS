@@ -22,6 +22,9 @@ extern irq_cpustat_t irq_stat[];
  */
 #define in_interrupt() ({ (local_irq_count() + local_bh_count() != 0); })
 
+#define hardirq_trylock()	(local_irq_count() == 0)
+#define hardirq_endlock()	do { } while (0)
+
 #define irq_enter(irq)		(local_irq_count()++)
 #define irq_exit(irq)		(local_irq_count()--)
 
