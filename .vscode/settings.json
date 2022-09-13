@@ -1,5 +1,6 @@
 {
 	"files.associations": {
 		"desc.h": "c"
-	}
+	},
+	"C_Cpp.errorSquiggles": "Enabled"
 }

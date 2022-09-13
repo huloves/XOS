@@ -80,7 +80,7 @@ void tasklet_init(struct tasklet_struct *t,
 {
 	t->func = func;
 	t->data = data;
-	t->state = 0; 
+	t->state = 0;
 	atomic_set(&t->count, 0);
 }
 
@@ -93,15 +93,19 @@ spinlock_t global_bh_lock = SPIN_LOCK_UNLOCKED;
 static void bh_action(unsigned long nr)
 {
 	int cpu = 0;
-	if (!spin_trylock(&global_bh_lock))
+	if (!spin_trylock(&global_bh_lock)) {
 		goto resched;
-	if (!hardirq_trylock())
+	}
+	if (!hardirq_trylock()) {
 		goto resched_unlock;
-	if (bh_base[nr])
+	}
+	if (bh_base[nr]) {
 		bh_base[nr]();
+	}
 
 	hardirq_endlock();
 	spin_unlock(&global_bh_lock);
+
 resched_unlock:
 	spin_unlock(&global_bh_lock);
 resched:
