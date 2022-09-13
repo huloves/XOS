@@ -5,7 +5,11 @@
             "includePath": [
                 "~/repositories/XOS/include/"
             ],
-            "defines": [],
+            "defines": [
+                "NR_CPUS=1",
+                "asmlinkage=__attribute__((regparm(0)))",
+                "SPIN_LOCK_UNLOCKED=(spinlock_t) { 0 }"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++14",
