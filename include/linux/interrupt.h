@@ -119,6 +119,16 @@ struct tasklet_head
 extern struct tasklet_head tasklet_vec[NR_CPUS];
 extern struct tasklet_head tasklet_hi_vec[NR_CPUS];
 
+#ifdef CONFIG_SMP
+#define tasklet_trylock(t) (!test_and_set_bit(TASKLET_STATE_RUN, &(t)->state))
+#define tasklet_unlock_wait(t) while (test_bit(TASKLET_STATE_RUN, &(t)->state)) { /* NOTHING */ }
+#define tasklet_unlock(t) clear_bit(TASKLET_STATE_RUN, &(t)->state)
+#else
+#define tasklet_trylock(t) 1
+#define tasklet_unlock_wait(t) do { } while (0)
+#define tasklet_unlock(t) do { } while (0)
+#endif
+
 static inline void tasklet_hi_schedule(struct tasklet_struct *t)
 {
 	if (!test_and_set_bit(TASKLET_STATE_SCHED, &t->state)) {

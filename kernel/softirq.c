@@ -11,6 +11,7 @@
 #include <asm-i386/atomic.h>
 #include <linux/spinlock.h>
 #include <asm-i386/hardirq.h>
+#include <asm-i386/types.h>
 
 irq_cpustat_t irq_stat[NR_CPUS];
 
@@ -89,6 +90,40 @@ void open_softirq(int nr, void (*action)(struct softirq_action*), void *data)
 /* Tasklets */
 
 struct tasklet_head tasklet_vec[NR_CPUS] __cacheline_aligned;
+
+static void tasklet_action(struct softirq_action *a)
+{
+	int cpu = 0;
+	
+	struct tasklet_struct *list;
+	local_irq_disable();
+	list = tasklet_vec[cpu].list;
+	tasklet_vec[cpu].list = NULL;
+	local_irq_enable();
+
+	while(list != NULL) {
+		struct tasklet_struct *t = list;
+		
+		list = list->next;
+
+		if(tasklet_trylock(t)) {
+			if (atomic_read(&t->count) == 0) {
+				clear_bit(TASKLET_STATE_SCHED, &t->state);
+
+				t->func(t->data);
+
+				continue;
+			}
+			tasklet_unlock(t);
+		}
+		local_irq_disable();
+		t->next = tasklet_vec[cpu].list;
+		tasklet_vec[cpu].list = t;
+		__cpu_raise_softirq(cpu, TASKLET_SOFTIRQ);
+		local_irq_enable();
+	}
+}
+
 struct tasklet_head tasklet_hi_vec[NR_CPUS] __cacheline_aligned;
 
 void tasklet_init(struct tasklet_struct *t,
