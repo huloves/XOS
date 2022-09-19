@@ -70,6 +70,22 @@ retry:
 	goto restart;
 }
 
+static spinlock_t softirq_mask_lock = SPIN_LOCK_UNLOCKED;
+
+void open_softirq(int nr, void (*action)(struct softirq_action*), void *data)
+{
+	unsigned long flags;
+	int i;
+
+	spin_lock_irqsave(&softirq_mask_lock, flags);
+	softirq_vec[nr].data = data;
+	softirq_vec[nr].action = action;
+
+	for (i=0; i<NR_CPUS; i++)
+		softirq_mask() |= (1<<nr);
+	spin_unlock_irqrestore(&softirq_mask_lock, flags);
+}
+
 /* Tasklets */
 
 struct tasklet_head tasklet_vec[NR_CPUS] __cacheline_aligned;
