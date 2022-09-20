@@ -126,6 +126,39 @@ static void tasklet_action(struct softirq_action *a)
 
 struct tasklet_head tasklet_hi_vec[NR_CPUS] __cacheline_aligned;
 
+static void tasklet_hi_action(struct softirq_action *a)
+{
+	int cpu = 0;
+	struct tasklet_struct *list;
+
+	local_irq_disable();
+	list = tasklet_hi_vec[cpu].list;
+	tasklet_hi_vec[cpu].list = NULL;
+	local_irq_enable();
+
+	while (list != NULL) {
+		struct tasklet_struct *t = list;
+
+		list = list->next;
+
+		if (tasklet_trylock(t)) {
+			if (atomic_read(&t->count) == 0) {
+				clear_bit(TASKLET_STATE_SCHED, &t->state);
+
+				t->func(t->data);
+				tasklet_unlock(t);
+				continue;
+			}
+			tasklet_unlock(t);
+		}
+		local_irq_disable();
+		t->next = tasklet_hi_vec[cpu].list;
+		tasklet_hi_vec[cpu].list = t;
+		__cpu_raise_softirq(cpu, HI_SOFTIRQ);
+		local_irq_enable();
+	}
+}
+
 void tasklet_init(struct tasklet_struct *t,
 				  void (*func)(unsigned long), unsigned long data)
 {
