@@ -111,7 +111,8 @@ static void tasklet_action(struct softirq_action *a)
 				clear_bit(TASKLET_STATE_SCHED, &t->state);
 
 				t->func(t->data);
-
+				
+				tasklet_unlock(t);
 				continue;
 			}
 			tasklet_unlock(t);
@@ -146,6 +147,7 @@ static void tasklet_hi_action(struct softirq_action *a)
 				clear_bit(TASKLET_STATE_SCHED, &t->state);
 
 				t->func(t->data);
+
 				tasklet_unlock(t);
 				continue;
 			}
