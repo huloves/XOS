@@ -198,6 +198,11 @@ resched:
 	mark_bh(nr);
 }
 
+void init_bh(int nr, void (*routine)(void))
+{
+	bh_base[nr] = routine;
+}
+
 void softirq_init()
 {
 	int i;

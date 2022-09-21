@@ -1,6 +1,29 @@
 #ifndef __ASM_SYSTEM_H
 #define __ASM_SYSTEM_H
 
+/*
+ * Force strict CPU ordering.
+ * And yes, this is required on UP too when we're talking
+ * to devices.
+ *
+ * For now, "wmb()" doesn't actually do anything, as all
+ * Intel CPU's follow what Intel calls a *Processor Order*,
+ * in which all writes are seen in the program order even
+ * outside the CPU.
+ *
+ * I expect future Intel CPU's to have a weaker ordering,
+ * but I'd also expect them to finally get their act together
+ * and add some real memory barriers if so.
+ *
+ * The Pentium III does add a real memory barrier with the
+ * sfence instruction, so we use that where appropriate.
+ */
+#ifndef CONFIG_X86_XMM
+#define mb() 	__asm__ __volatile__ ("lock; addl $0,0(%%esp)": : :"memory")
+#else
+#define mb()	__asm__ __volatile__ ("sfence": : :"memory")
+#endif
+
 #define __cli() 		__asm__ __volatile__("cli": : :"memory")
 #define __sti()			__asm__ __volatile__("sti": : :"memory")
 #define cli() __cli()

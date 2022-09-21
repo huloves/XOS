@@ -9,6 +9,7 @@
 #include <asm-i386/system.h>
 #include <linux/spinlock.h>
 #include <linux/threads.h>
+#include <linux/cache.h>
 
 struct irqaction {
 	void (*handler)(int, void *, struct pt_regs *);
