@@ -3,8 +3,11 @@
 #include <asm-i386/segment.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/hw_irq.h>
+#include <linux/linkage.h>
 
 struct desc_struct idt_table[256] __attribute__((__section__(".data.idt"))) = { {0, 0}, };
+
+asmlinkage void page_fault(void);
 
 #define _set_gate(gate_addr,type,dpl,addr) \
 do { \

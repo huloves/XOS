@@ -99,6 +99,19 @@ ret_with_reschedule:
 restore_all:
 	RESTORE_ALL
 
+ret_from_exception:
+#ifdef CONFIG_SMP
+	GET_CURRENT(%ebx)
+	movl processor(%ebx),%eax
+	shll $CONFIG_X86_L1_CACHE_SHIFT,%eax
+	movl SYMBOL_NAME(irq_stat)(,%eax),%ecx		# softirq_active
+	testl SYMBOL_NAME(irq_stat)+4(,%eax),%ecx	# softirq_mask
+#else
+	movl SYMBOL_NAME(irq_stat),%ecx		# softirq_active
+	testl SYMBOL_NAME(irq_stat)+4,%ecx	# softirq_mask
+#endif
+	jne   handle_softirq
+
 ENTRY(ret_from_intr)
 	GET_CURRENT(%ebx)
 	movl EFLAGS(%esp),%eax		# mix EFLAGS and CS
@@ -116,6 +129,38 @@ handle_softirq:
 reschedule:
 	# call SYMBOL_NAME(schedule)    # test
 	jmp ret_from_sys_call
+
+error_code:
+	pushl %ds
+	pushl %eax
+	xorl %eax,%eax
+	pushl %ebp
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	decl %eax			# eax = -1
+	pushl %ecx
+	pushl %ebx
+	cld
+	movl %es,%ecx
+	movl ORIG_EAX(%esp), %esi	# get the error code
+	movl ES(%esp), %edi		# get the function address
+	movl %eax, ORIG_EAX(%esp)
+	movl %ecx, ES(%esp)
+	movl %esp,%edx
+	pushl %esi			# push the error code
+	pushl %edx			# push the pt_regs pointer
+	movl $(__KERNEL_DS),%edx
+	movl %edx,%ds
+	movl %edx,%es
+	GET_CURRENT(%ebx)
+	call *%edi
+	addl $8,%esp
+	jmp ret_from_exception
+
+ENTRY(page_fault)
+	pushl $ SYMBOL_NAME(do_page_fault)
+	jmp error_code
 
 .data
 ENTRY(sys_call_table)
