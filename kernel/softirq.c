@@ -22,7 +22,7 @@ asmlinkage void do_softirq()
 	int cpu = 0;
 	__u32 active, mask;
 
-	if(in_interrupt()) {
+	if(in_interrupt()) {   // 软中断服务程序不允许在一个硬中断服务程序内部执行，也不允许在一个软中断服务程序内部执行
 		return;
 	}
 
