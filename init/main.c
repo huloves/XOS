@@ -5,6 +5,7 @@
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
+extern void time_init(void);
 
 void start_kernel(void)
 {
