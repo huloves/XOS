@@ -233,3 +233,12 @@ out:
 		do_softirq();
 	return 1;
 }
+
+/* this was setup_x86_irq but it seems pretty generic */
+int setup_irq(unsigned int irq, struct irqaction *new)
+{
+	int shared = 0;
+	unsigned long flags;
+	struct irqaction *old, **p;
+	irq_desc_t *desc = irq_desc + irq;
+}
