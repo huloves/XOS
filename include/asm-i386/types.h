@@ -61,6 +61,7 @@ typedef __kernel_uid16_t        uid16_t;
 typedef __kernel_gid16_t        gid16_t;
 typedef __kernel_loff_t		loff_t;
 typedef __kernel_time_t		time_t;
+typedef __kernel_suseconds_t    suseconds_t;
 typedef unsigned long long __u64;
 
 typedef __kernel_off_t		off_t;

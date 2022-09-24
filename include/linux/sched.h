@@ -171,4 +171,6 @@ union task_union {
 
 extern union task_union init_task_union;
 
+extern struct timeval xtime;
+
 #endif /* _LINUX_SCHED_H */
