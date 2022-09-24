@@ -11,6 +11,7 @@
 #include <asm-i386/system.h>
 #include <linux/irq_cpustat.h>
 #include <linux/interrupt.h>
+#include <asm-i386/error.h>
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.
@@ -241,4 +242,45 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 	unsigned long flags;
 	struct irqaction *old, **p;
 	irq_desc_t *desc = irq_desc + irq;
+
+	/*
+	 * Some drivers like serial.c use request_irq() heavily,
+	 * so we have to be careful not to interfere with a
+	 * running system.
+	 */
+	if (new->flags & SA_SAMPLE_RANDOM) {
+
+	}
+
+	/*
+	 * The following block of code has to be executed atomically
+	 */
+	spin_lock_irqsave(&desc->lock, flags);
+	p = &desc->action;
+	if ((old = *p) != NULL) {
+		/* Can't share interrupts unless both agree to */
+		if (!(old->flags & new->flags & SA_SHIRQ)) {
+			spin_unlock_irqrestore(&desc->lock, flags);
+			return -EBUSY;
+		}
+
+		/* add new interrupt at end of irq queue */
+		do {
+			p = &old->next;
+			old = *p;
+		} while (old);
+		shared = 1;
+	}
+
+	*p = new;
+
+	if (!shared) {
+		desc->depth = 0;
+		desc->status &= ~(IRQ_DISABLED | IRQ_AUTODETECT | IRQ_WAITING);
+		desc->handler->startup(irq);
+	}
+	spin_unlock_irqrestore(&desc->lock, flags);
+
+	// register_irq_proc(irq);
+	return 0;
 }

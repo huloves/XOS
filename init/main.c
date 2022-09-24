@@ -15,5 +15,6 @@ void start_kernel(void)
     setup_arch();
     trap_init();
     init_IRQ();
+    time_init();
     while(1);
 }

@@ -63,4 +63,6 @@ extern irq_desc_t irq_desc [NR_IRQS];
 
 extern hw_irq_controller no_irq_type;  /* needed in every arch ? */
 
+int setup_irq(unsigned int irq, struct irqaction *new);
+
 #endif /* _irq_h */

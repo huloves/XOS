@@ -6,6 +6,8 @@
 #include <asm-i386/types.h>
 #include <asm-i386/uaccess.h>
 #include <asm-i386/param.h>
+#include <linux/time.h>
+#include <asm-i386/ptrace.h>
 
 #define _STK_LIM	(8*1024*1024)
 #define DEF_COUNTER	(10*HZ/100)	/* 100 ms time slice */
@@ -171,6 +173,9 @@ union task_union {
 
 extern union task_union init_task_union;
 
-extern struct timeval xtime;
+extern unsigned long volatile jiffies;
+volatile struct timeval xtime __attribute__ ((aligned(16)));
+
+void do_timer(struct pt_regs *regs);
 
 #endif /* _LINUX_SCHED_H */
