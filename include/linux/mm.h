@@ -315,4 +315,21 @@ void free_area_init(unsigned long *zones_size);
 
 #define GFP_DMA		__GFP_DMA
 
+#define __get_free_page(gfp_mask) \
+		__get_free_pages((gfp_mask),0)
+
+extern struct page * _alloc_pages(unsigned int gfp_mask, unsigned int order);
+
+static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int order)
+{
+    /*
+     * Gets optimized away by the compiler.
+     */
+    if (order >= MAX_ORDER)
+        return NULL;
+    return _alloc_pages(gfp_mask, order);
+}
+
+extern unsigned long __get_free_pages(int gfp_mask, unsigned long order);
+
 #endif

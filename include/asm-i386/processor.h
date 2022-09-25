@@ -13,6 +13,7 @@
 #include <asm-i386/page.h>
 #include <linux/sched.h>
 #include <asm-i386/desc.h>
+#include <linux/mm.h>
 
 extern unsigned long mmu_cr4_features;
 
@@ -173,6 +174,10 @@ struct tss_struct {
 	0, INVALID_IO_BITMAP_OFFSET, /* tace, bitmap */		\
 	{~0, } /* ioperm */					\
 }
+
+#define THREAD_SIZE (2*PAGE_SIZE)
+#define alloc_task_struct() ((struct task_struct *) __get_free_pages(GFP_KERNEL,1))
+#define free_task_struct(p) free_pages((unsigned long) (p), 1)
 
 #define init_task  (init_task_union.task)
 #define init_stack (init_task_union.stack)

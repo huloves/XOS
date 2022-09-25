@@ -6,6 +6,7 @@
 #include <linux/bootmem.h>
 #include <linux/list.h>
 #include <linux/string.h>
+#include <asm-i386/bitops.h>
 
 pg_data_t *pgdat_list;
 
@@ -32,7 +33,191 @@ static int zone_balance_max[MAX_NR_ZONES]  = { 255 , 255, 255, };
 	|| ((zone) != page_zone(page))									\
 )
 
-#define LONG_ALIGN(x) (((x)+(sizeof(long))-1)&~((sizeof(long))-1))
+#define MARK_USED(index, order, area) \
+	__change_bit((index) >> (1+(order)), (area)->map)
+
+static inline struct page * expand (zone_t *zone, struct page *page,
+                                    unsigned long index, int low, int high, free_area_t * area)
+{
+    unsigned long size = 1 << high;
+
+    while (high > low) {
+        if (BAD_RANGE(zone,page))
+            BUG();
+        area--;
+        high--;
+        size >>= 1;
+        list_add(&(page)->list, &(area)->free_list);
+        MARK_USED(index, high, area);
+        index += size;
+        page += size;
+    }
+    if (BAD_RANGE(zone,page))
+        BUG();
+    return page;
+}
+
+static struct page * rmqueue(zone_t *zone, unsigned int order)
+{
+    free_area_t * area = zone->free_area + order;
+    unsigned int curr_order = order;
+    struct list_head *head, *curr;
+    unsigned long flags;
+    struct page *page;
+
+    spin_lock_irqsave(&zone->lock, flags);
+    do {
+        head = &area->free_list;
+        curr = head->next;
+
+        if (curr != head) {
+            unsigned int index;
+
+            page = list_entry(curr, struct page, list);
+            if (BAD_RANGE(zone,page))
+                BUG();
+            list_del(curr);
+            index = page - zone->zone_mem_map;
+            if (curr_order != MAX_ORDER-1)
+                MARK_USED(index, curr_order, area);
+            zone->free_pages -= 1UL << order;
+
+            page = expand(zone, page, index, order, curr_order, area);
+            spin_unlock_irqrestore(&zone->lock, flags);
+
+            set_page_count(page, 1);
+            if (BAD_RANGE(zone,page))
+                BUG();
+            if (PageLRU(page))
+            BUG();
+            if (PageActive(page))
+                BUG();
+            return page;
+        }
+        curr_order++;
+        area++;
+    } while (curr_order < MAX_ORDER);
+    spin_unlock_irqrestore(&zone->lock, flags);
+
+    return NULL;
+}
+
+/* This is the 'heart' of the zoned buddy allocator: */
+struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
+{
+	unsigned long min;
+	zone_t **zone, * classzone;
+	struct page * page;
+	int freed;
+
+	zone = zonelist->zones;
+	classzone = *zone;
+	if (classzone == NULL)
+		return NULL;
+	min = 1UL << order;
+	for (;;) {
+		zone_t *z = *(zone++);
+		if (!z)
+			break;
+
+		min += z->pages_low;
+		if (z->free_pages > min) {
+			page = rmqueue(z, order);
+			if (page)
+				return page;
+		}
+	}
+	return NULL;
+
+// 	classzone->need_balance = 1;
+// 	mb();
+// 	if (waitqueue_active(&kswapd_wait))
+// 		wake_up_interruptible(&kswapd_wait);
+
+// 	zone = zonelist->zones;
+// 	min = 1UL << order;
+// 	for (;;) {
+// 		unsigned long local_min;
+// 		zone_t *z = *(zone++);
+// 		if (!z)
+// 			break;
+
+// 		local_min = z->pages_min;
+// 		if (!(gfp_mask & __GFP_WAIT))
+// 			local_min >>= 2;
+// 		min += local_min;
+// 		if (z->free_pages > min) {
+// 			page = rmqueue(z, order);
+// 			if (page)
+// 				return page;
+// 		}
+// 	}
+
+// 	/* here we're in the low on memory slow path */
+
+// rebalance:
+// 	if (current->flags & (PF_MEMALLOC | PF_MEMDIE)) {
+// 		zone = zonelist->zones;
+// 		for (;;) {
+// 			zone_t *z = *(zone++);
+// 			if (!z)
+// 				break;
+
+// 			page = rmqueue(z, order);
+// 			if (page)
+// 				return page;
+// 		}
+// 		return NULL;
+// 	}
+
+// 	/* Atomic allocations - we can't balance anything */
+// 	if (!(gfp_mask & __GFP_WAIT))
+// 		return NULL;
+
+// 	page = balance_classzone(classzone, gfp_mask, order, &freed);
+// 	if (page)
+// 		return page;
+
+// 	zone = zonelist->zones;
+// 	min = 1UL << order;
+// 	for (;;) {
+// 		zone_t *z = *(zone++);
+// 		if (!z)
+// 			break;
+
+// 		min += z->pages_min;
+// 		if (z->free_pages > min) {
+// 			page = rmqueue(z, order);
+// 			if (page)
+// 				return page;
+// 		}
+// 	}
+
+// 	/* Don't let big-order allocations loop */
+// 	if (order > 3)
+// 		return NULL;
+
+// 	/* Yield for kswapd, and try again */
+// 	yield();
+// 	goto rebalance;
+}
+
+struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
+{
+    return __alloc_pages(gfp_mask, order,
+                         contig_page_data.node_zonelists+(gfp_mask & GFP_ZONEMASK));
+}
+
+/* common helper function */
+unsigned long __get_free_pages(int gfp_mask, unsigned long order)
+{
+	struct page *page;
+
+	page = alloc_pages(gfp_mask, order);
+    if (!page)
+        return 0;
+    return (unsigned long) page_address(page);
+}
 
 /*
  * Builds allocation fallback zone lists.
@@ -82,6 +267,8 @@ static inline void build_zonelists(pg_data_t *pgdat)
 		zonelist->zones[j++] = NULL;
 	}
 }
+
+#define LONG_ALIGN(x) (((x)+(sizeof(long))-1)&~((sizeof(long))-1))
 
 /*
  * Set up the zone data structures:
