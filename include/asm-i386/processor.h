@@ -177,7 +177,7 @@ struct tss_struct {
 
 #define THREAD_SIZE (2*PAGE_SIZE)
 #define alloc_task_struct() ((struct task_struct *) __get_free_pages(GFP_KERNEL,1))
-#define free_task_struct(p) free_pages((unsigned long) (p), 1)
+// #define free_task_struct(p) free_pages((unsigned long) (p), 1)
 
 #define init_task  (init_task_union.task)
 #define init_stack (init_task_union.stack)
