@@ -30,15 +30,6 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
 */
 static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
-	int count;
-
-	/*
-	 * Here we are in the timer irq handler. We just have irqs locally
-	 * disabled but we don't know if the timer_bh is running on the other
-	 * CPU. We need to avoid to SMP race with it. NOTE: we don' t need
-	 * the irq version of write_lock because as just said we have irq
-	 * locally disabled. -arca
-	 */
 	do_timer_interrupt(irq, dev_id, regs);
 }
 

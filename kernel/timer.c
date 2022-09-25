@@ -17,7 +17,7 @@ unsigned long volatile jiffies;
 
 void update_process_times()
 {
-	printk("timer interrupt\n");
+	printk("update_process_times happen\n\n");
 }
 
 void timer_bh(void)
