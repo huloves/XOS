@@ -120,6 +120,44 @@ static inline void clear_in_cr4 (unsigned long mask)
 		:"ax");
 }
 
+/*
+ * Size of io_bitmap in longwords: 32 is ports 0-0x3ff.
+ */
+#define IO_BITMAP_SIZE	32
+#define IO_BITMAP_OFFSET offsetof(struct tss_struct,io_bitmap)
+#define INVALID_IO_BITMAP_OFFSET 0x8000
+
+struct tss_struct {
+	unsigned short	back_link,__blh;
+	unsigned long	esp0;
+	unsigned short	ss0,__ss0h;
+	unsigned long	esp1;
+	unsigned short	ss1,__ss1h;
+	unsigned long	esp2;
+	unsigned short	ss2,__ss2h;
+	unsigned long	__cr3;
+	unsigned long	eip;
+	unsigned long	eflags;
+	unsigned long	eax,ecx,edx,ebx;
+	unsigned long	esp;
+	unsigned long	ebp;
+	unsigned long	esi;
+	unsigned long	edi;
+	unsigned short	es, __esh;
+	unsigned short	cs, __csh;
+	unsigned short	ss, __ssh;
+	unsigned short	ds, __dsh;
+	unsigned short	fs, __fsh;
+	unsigned short	gs, __gsh;
+	unsigned short	ldt, __ldth;
+	unsigned short	trace, bitmap;
+	unsigned long	io_bitmap[IO_BITMAP_SIZE+1];
+	/*
+	 * pads the TSS to be cacheline-aligned (size is 0x100)
+	 */
+	unsigned long __cacheline_filler[5];
+};
+
 #define INIT_TSS  {						\
 	0,0, /* back_link, __blh */				\
 	sizeof(init_stack) + (long) &init_stack, /* esp0 */	\
