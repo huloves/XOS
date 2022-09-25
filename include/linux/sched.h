@@ -164,7 +164,9 @@ struct task_struct {
     alloc_lock:		SPIN_LOCK_UNLOCKED				\
 }
 
+#ifndef INIT_TASK_SIZE
 # define INIT_TASK_SIZE	2048*sizeof(long)
+#endif
 
 union task_union {
     struct task_struct task;
