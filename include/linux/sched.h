@@ -9,11 +9,11 @@
 #include <linux/time.h>
 #include <asm-i386/ptrace.h>
 
-#define TASK_RUNNING			0
-#define TASK_INTERRUPTIBLE		1
-#define TASK_UNINTERRUPTIBLE	2
+#define TASK_RUNNING			0   // 可以被调度
+#define TASK_INTERRUPTIBLE		1   // 可以因信号的到来而被唤醒
+#define TASK_UNINTERRUPTIBLE	2   // 深度睡眠，不受信号的打扰
 #define TASK_ZOMBIE				4
-#define TASK_STOPPED			8
+#define TASK_STOPPED			8   // 收到 SIGSTOP 信号后，刮起状态
 
 #define _STK_LIM	(8*1024*1024)
 #define DEF_COUNTER	(10*HZ/100)	/* 100 ms time slice */
