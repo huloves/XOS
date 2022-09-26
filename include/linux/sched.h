@@ -9,8 +9,15 @@
 #include <linux/time.h>
 #include <asm-i386/ptrace.h>
 
+#define TASK_RUNNING			0
+#define TASK_INTERRUPTIBLE		1
+#define TASK_UNINTERRUPTIBLE	2
+#define TASK_ZOMBIE				4
+#define TASK_STOPPED			8
+
 #define _STK_LIM	(8*1024*1024)
 #define DEF_COUNTER	(10*HZ/100)	/* 100 ms time slice */
+#define MAX_COUNTER	(20*HZ/100)
 #define DEF_NICE	(0)
 /*
  * Scheduling policies

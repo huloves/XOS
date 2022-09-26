@@ -71,4 +71,8 @@ SYMBOL_NAME_STR(IRQ) #nr "_interrupt:\n\t" \
 	"pushl $"#nr"-256\n\t" \
 	"jmp common_interrupt");
 
+#define GET_CURRENT \
+	"movl %esp, %ebx\n\t" \
+	"andl %-8192, %ebx\n\t"
+
 #endif
