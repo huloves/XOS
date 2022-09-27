@@ -34,7 +34,7 @@ struct task_struct {
 	 */
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	unsigned long flags;	/* per process flags, defined below */
-	int sigpending;
+	int sigpending;   // 表示进程收到信号但尚未处理
 	/*mm_segment_t addr_limit;	/* thread address space:
 					 	0-0xBFFFFFFF for user-thead
 						0-0xFFFFFFFF for kernel-thread
@@ -149,6 +149,31 @@ struct task_struct {
 /* Protection of (de-)allocation: mm, files, fs, tty */
 	spinlock_t alloc_lock;
 };
+
+/*
+ * Per process flags
+ */
+#define PF_ALIGNWARN	0x00000001		/* Print alignment warning msgs */
+										/* Not implemented yet, only for 486*/
+#define PF_STARTING		0x00000002		/* being created */
+#define PF_EXITING		0x00000004		/* getting shut down */
+#define PF_FORKNOEXEC	0x00000040		/* forked but didn't exec */
+#define PF_SUPERPRIV	0x00000100		/* used super-user privileges */
+#define PF_DUMPCORE		0x00000200		/* dumped core */
+#define PF_SIGNALED		0x00000400		/* killed by a signal */
+#define PF_MEMALLOC		0x00000800		/* Allocating memory */
+#define PF_VFORK		0x00001000		/* Wake up parent in mm_release */
+
+#define PF_USEDFPU		0x00100000		/* task used FPU this quantum (SMP) */
+
+/*
+ * Ptrace flags
+ */
+
+#define PT_PTRACED		0x00000001
+#define PT_TRACESYS		0x00000002
+#define PT_DTRACE		0x00000004		/* delayed trace (used on m68k, i386) */
+#define PT_TRACESYSGOOD	0x00000008
 
 #define INIT_TASK(tsk)	\
 {									\
