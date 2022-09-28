@@ -8,6 +8,8 @@
 #include <asm-i386/param.h>
 #include <linux/time.h>
 #include <asm-i386/ptrace.h>
+#include <linux/resource.h>
+#include <asm-i386/resource.h>
 
 #define TASK_RUNNING			0   // 可以被调度
 #define TASK_INTERRUPTIBLE		1   // 可以因信号的到来而被唤醒
@@ -39,8 +41,8 @@ struct task_struct {
 					 	0-0xBFFFFFFF for user-thead
 						0-0xFFFFFFFF for kernel-thread
 					 */
-	// struct exec_domain *exec_domain;
-	volatile long need_resched;
+	// struct exec_domain *exec_domain;   // 指向描述本进程所属执行域的数据结构
+	volatile long need_resched;   // 表示CPU从系统空间返回用户空间需要一次调度
 	unsigned long ptrace;
 
 	int lock_depth;		/* Lock depth */
@@ -114,7 +116,7 @@ struct task_struct {
 	int keep_capabilities:1;
 	// struct user_struct *user;
 /* limits */
-	// struct rlimit rlim[RLIM_NLIMITS];
+	struct rlimit rlim[RLIM_NLIMITS];
 	unsigned short used_math;
 	char comm[16];
 /* file system info */
