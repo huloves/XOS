@@ -62,7 +62,7 @@ struct task_struct {
 	 * (only the 'next' pointer fits into the cacheline, but
 	 * that's just fine.)
 	 */
-	struct list_head run_list;
+	struct list_head run_list;   // 可执行队列节点
 	unsigned long sleep_time;
 
 	struct task_struct *next_task, *prev_task;
@@ -88,7 +88,7 @@ struct task_struct {
 	 * older sibling, respectively.  (p->father can be replaced with 
 	 * p->p_pptr->pid)
 	 */
-	struct task_struct *p_opptr, *p_pptr, *p_cptr, *p_ysptr, *p_osptr;
+	struct task_struct *p_opptr, *p_pptr, *p_cptr, *p_ysptr, *p_osptr;   // p_opptr,p_pptr指向父进程的task_struct，p_cptr指向最年轻的子进程，p_ysptr和p_osptr指向弟弟和哥哥
 	struct list_head thread_group;
 
 	/* PID hash table linkage. */
@@ -101,9 +101,9 @@ struct task_struct {
 	unsigned long it_real_value, it_prof_value, it_virt_value;
 	unsigned long it_real_incr, it_prof_incr, it_virt_incr;
 	// struct timer_list real_timer;
-	// struct tms times;
+	// struct tms times;   // 对per_cpu_utime[] and per_cpu_stime[] 的汇总
 	unsigned long start_time;
-	// long per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS];
+	// long per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS];   // 表示进程在各个处理器上运行于用户空间和系统空间的累计时间
 /* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */
 	unsigned long min_flt, maj_flt, nswap, cmin_flt, cmaj_flt, cnswap;
 	int swappable:1;
@@ -208,6 +208,10 @@ union task_union {
 };
 
 extern union task_union init_task_union;
+
+/* PID hashing. (shouldnt this be dynamic?) */
+#define PIDHASH_SZ (4096 >> 2)
+extern struct task_struct *pidhash[PIDHASH_SZ];
 
 extern unsigned long volatile jiffies;
 volatile struct timeval xtime __attribute__ ((aligned(16)));
