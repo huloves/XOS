@@ -144,6 +144,11 @@ static inline void tasklet_hi_schedule(struct tasklet_struct *t)
 	}
 }
 
+extern void tasklet_kill(struct tasklet_struct *t);
+extern void tasklet_init(struct tasklet_struct *t,
+				  		 void (*func)(unsigned long), 
+						 unsigned long data);
+
 /* Old BH definitions */
 
 extern struct tasklet_struct bh_task_vec[];
@@ -155,5 +160,8 @@ static inline void mark_bh(int nr)
 {
 	tasklet_hi_schedule(bh_task_vec+nr);
 }
+
+extern void init_bh(int nr, void (*routine)(void));
+extern void remove_bh(int nr);
 
 #endif /* _LINUX_INTERRUPT_H  */

@@ -30,6 +30,8 @@
 
 void trap_init(void);
 
+extern void sched_init(void);
+
 struct task_struct {
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care

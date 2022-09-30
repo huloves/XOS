@@ -12,6 +12,9 @@
 #include <linux/spinlock.h>
 #include <asm-i386/hardirq.h>
 #include <asm-i386/types.h>
+#include <asm-i386/current.h>
+#include <linux/sched.h>
+#include <asm-i386/stdio.h>
 
 irq_cpustat_t irq_stat[NR_CPUS];
 
@@ -170,6 +173,23 @@ void tasklet_init(struct tasklet_struct *t,
 	atomic_set(&t->count, 0);
 }
 
+void tasklet_kill(struct tasklet_struct *t)
+{
+	if (in_interrupt()) {
+		printk("Attempt to kill tasklet from interrupt\n");
+	}
+
+	// while (test_and_clear_bit(TASKLET_STATE_SCHED, &t->state)) {
+		// current->state = TASK_RUNNING;
+		// do {
+			// current->policy |= SCHED_YIELD;
+			// schedule();
+		// } while (test_bit(TASKLET_STATE_SCHED, &t->state));
+	// }
+	tasklet_unlock_wait(t);
+	clear_bit(TASKLET_STATE_SCHED, &t->state);
+}
+
 /* Old style BHs */
 static void (*bh_base[32])(void);
 struct tasklet_struct bh_task_vec[32];
@@ -201,6 +221,12 @@ resched:
 void init_bh(int nr, void (*routine)(void))
 {
 	bh_base[nr] = routine;
+}
+
+void remove_bh(int nr)
+{
+	tasklet_kill(bh_task_vec + nr);
+	bh_base[nr] = NULL;
 }
 
 void softirq_init()
