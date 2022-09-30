@@ -62,7 +62,7 @@ struct task_struct {
 	 * (only the 'next' pointer fits into the cacheline, but
 	 * that's just fine.)
 	 */
-	struct list_head run_list;   // 可执行队列节点
+	struct list_head run_list;   // 可执行队列节点，只有在可执行队列才有可能被调度运行
 	unsigned long sleep_time;
 
 	struct task_struct *next_task, *prev_task;
