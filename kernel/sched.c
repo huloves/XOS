@@ -1,5 +1,6 @@
 #include <linux/sched.h>
 #include <linux/kernel_stat.h>
+#include <linux/interrupt.h>
 
 extern void timer_bh(void);
 
@@ -19,4 +20,6 @@ void sched_init(void)
 	}
 
 	init_timervecs();   // 初始化内核定时器
+
+	init_bh(TIMER_BH, timer_bh);
 }

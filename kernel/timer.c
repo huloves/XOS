@@ -113,6 +113,14 @@ spinlock_t timerlist_lock = SPIN_LOCK_UNLOCKED;
 #define timer_enter(t)		do { } while (0)
 #define timer_exit()		do { } while (0)
 
+static inline int detach_timer (struct timer_list *timer)
+{
+	if (!timer_pending(timer))
+		return 0;
+	list_del(&timer->list);
+	return 1;
+}
+
 static inline void cascade_timers(struct timer_vec *tv)
 {
 	/* cascade all the timers from tv up one level */
