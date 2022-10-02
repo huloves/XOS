@@ -5,7 +5,7 @@ extern void timer_bh(void);
 
 struct kernel_stat kstat;
 
-// extern void init_timervecs(void);
+extern void init_timervecs(void);
 
 void sched_init(void)
 {
@@ -18,5 +18,5 @@ void sched_init(void)
 		pidhash[nr] = NULL;
 	}
 
-	// init_timervecs();
+	init_timervecs();
 }
