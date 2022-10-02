@@ -18,5 +18,5 @@ void sched_init(void)
 		pidhash[nr] = NULL;
 	}
 
-	init_timervecs();
+	init_timervecs();   // 初始化内核定时器
 }
