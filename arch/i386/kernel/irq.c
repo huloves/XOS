@@ -12,6 +12,7 @@
 #include <linux/irq_cpustat.h>
 #include <linux/interrupt.h>
 #include <asm-i386/error.h>
+#include <asm-i386/stdio.h>
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.
@@ -79,7 +80,8 @@ struct hw_interrupt_type no_irq_type = {
 	end_none
 };
 
-atomic_t irq_err_count;
+// atomic_t irq_err_count;
+volatile unsigned long irq_err_count;
 
 /*
  * Generic enable/disable code: this just calls
@@ -154,6 +156,7 @@ int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction *
  */
 asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 {	
+	printk("1111111\n");
 	/* 
 	 * We ack quickly, we don't want the irq controller
 	 * thinking we're snobs just because some other CPU has
@@ -242,15 +245,6 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 	unsigned long flags;
 	struct irqaction *old, **p;
 	irq_desc_t *desc = irq_desc + irq;
-
-	/*
-	 * Some drivers like serial.c use request_irq() heavily,
-	 * so we have to be careful not to interfere with a
-	 * running system.
-	 */
-	if (new->flags & SA_SAMPLE_RANDOM) {
-
-	}
 
 	/*
 	 * The following block of code has to be executed atomically

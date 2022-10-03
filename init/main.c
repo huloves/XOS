@@ -2,6 +2,7 @@
 #include <asm-i386/stdio.h>
 #include <linux/init.h>
 #include <linux/sched.h>
+#include <asm-i386/system.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -15,7 +16,8 @@ void start_kernel(void)
     setup_arch();
     trap_init();
     init_IRQ();
-    sched_init();
+    // sched_init();
     time_init();
+    sti();
     while(1);
 }

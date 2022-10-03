@@ -21,7 +21,8 @@
 extern void disable_8259A_irq(unsigned int irq);
 extern void enable_8259A_irq(unsigned int irq);
 
-extern atomic_t irq_err_count;
+// extern atomic_t irq_err_count;
+extern volatile unsigned long irq_err_count;
 
 #define IRQ_NAME2(nr) nr##_interrupt(void)
 #define IRQ_NAME(nr) IRQ_NAME2(IRQ##nr)
@@ -43,15 +44,25 @@ extern atomic_t irq_err_count;
 	"movl %edx,%ds\n\t" \
 	"movl %edx,%es\n\t"
 
+// #define BUILD_COMMON_IRQ() \
+// asmlinkage void call_do_IRQ(void); \
+// __asm__( \
+// 	"\n" __ALIGN_STR"\n" \
+// 	"common_interrupt:\n\t" \
+// 	SAVE_ALL \
+// 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
+// 	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
+// 	"jmp ret_from_intr\n");
+
 #define BUILD_COMMON_IRQ() \
 asmlinkage void call_do_IRQ(void); \
 __asm__( \
 	"\n" __ALIGN_STR"\n" \
 	"common_interrupt:\n\t" \
 	SAVE_ALL \
+	"pushl $ret_from_intr\n\t" \
 	SYMBOL_NAME_STR(call_do_IRQ)":\n\t" \
-	"call " SYMBOL_NAME_STR(do_IRQ) "\n\t" \
-	"jmp ret_from_intr\n");
+	"jmp "SYMBOL_NAME_STR(do_IRQ));
 
 /* 
  * subtle. orig_eax is used by the signal code to distinct between

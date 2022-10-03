@@ -15,7 +15,7 @@ long tick = (1000000 + HZ/2) / HZ;	/* timer interrupt period */
 /* The current time */
 volatile struct timeval xtime __attribute__ ((aligned(16)));
 
-unsigned long volatile jiffies;
+unsigned long volatile jiffies;   // 系统自启动之后的时钟滴答数目
 static unsigned long timer_jiffies;
 
 /* Event timer code */
@@ -192,6 +192,7 @@ void timer_bh(void)
 void do_timer(struct pt_regs *regs)
 {
 	(*(unsigned long *)&jiffies)++;
-	update_process_times();
-	mark_bh(TIMER_BH);
+	printk("jiffies = %ld\n", jiffies);
+	// update_process_times();   // 与进程调度有关
+	// mark_bh(TIMER_BH);
 }

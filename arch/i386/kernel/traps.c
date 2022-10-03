@@ -160,7 +160,7 @@ void trap_init(void)
     set_trap_gate(11, common_temp11);
     set_trap_gate(12, common_temp12);
     set_trap_gate(13, common_temp13);
-    set_intr_gate(14, &page_fault);
+    set_intr_gate(14, common_temp14);
     set_trap_gate(15, common_temp15);
     set_trap_gate(16, common_temp16);
     set_trap_gate(17, common_temp17);

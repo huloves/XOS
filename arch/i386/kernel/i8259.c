@@ -67,6 +67,8 @@ void (*interrupt[NR_IRQS])(void) = {
 #endif
 };
 
+extern struct desc_struct idt_table[256];
+
 /*
  * This is the 'legacy' 8259A Programmable Interrupt Controller,
  * present in the majority of PC/AT boxes.
@@ -271,7 +273,8 @@ spurious_8259A_irq:
 			printk("spurious 8259A interrupt: IRQ%d.\n", irq);
 			spurious_irq_mask |= irqmask;
 		}
-		atomic_inc(&irq_err_count);
+		// atomic_inc(&irq_err_count);
+		irq_err_count++;
 		/*
 		 * Theoretically we do not have to handle this IRQ,
 		 * but in Linux this does not cause problems and is
@@ -293,18 +296,18 @@ void init_8259A(int auto_eoi)
 	/*
 	 * outb_p - this has to work on a wide range of PC hardware.
 	 */
-	outb_p(0x11, 0x20);	/* ICW1: select 8259A-1 init ，0x11 = 0001_0001，外部中断请求信号为上升沿有效，系统中有多片 8259A 级联，还表示要向 ICW4 送数据 */
-	outb_p(0x20 + 0, 0x21);	/* ICW2: 8259A-1 IR0-7 mapped to 0x20-0x27 ，0x20 = 0010_0000，设置中断向量 */
-	outb_p(0x04, 0x21);	/* 8259A-1 (the master) has a slave on IR2，0000_0100，主片使用 IRQ2 连接从片 */
+	outb(0x11, 0x20);	/* ICW1: select 8259A-1 init ，0x11 = 0001_0001，外部中断请求信号为上升沿有效，系统中有多片 8259A 级联，还表示要向 ICW4 送数据 */
+	outb(0x20 + 0, 0x21);	/* ICW2: 8259A-1 IR0-7 mapped to 0x20-0x27 ，0x20 = 0010_0000，设置中断向量 */
+	outb(0x04, 0x21);	/* 8259A-1 (the master) has a slave on IR2，0000_0100，主片使用 IRQ2 连接从片 */
 	if (auto_eoi)
-		outb_p(0x03, 0x21);	/* master does Auto EOI */
+		outb(0x03, 0x21);	/* master does Auto EOI */
 	else
-		outb_p(0x01, 0x21);	/* master expects normal EOI */
+		outb(0x01, 0x21);	/* master expects normal EOI */
 
-	outb_p(0x11, 0xA0);	/* ICW1: select 8259A-2 init，初始化从片 */
-	outb_p(0x20 + 8, 0xA1);	/* ICW2: 8259A-2 IR0-7 mapped to 0x28-0x2f */
-	outb_p(0x02, 0xA1);	/* 8259A-2 is a slave on master's IR2，0x20 = 0000_0010，指定主片的哪个接口连接从片 */
-	outb_p(0x01, 0xA1);	/* (slave's support for AEOI in flat mode
+	outb(0x11, 0xA0);	/* ICW1: select 8259A-2 init，初始化从片 */
+	outb(0x20 + 8, 0xA1);	/* ICW2: 8259A-2 IR0-7 mapped to 0x28-0x2f */
+	outb(0x02, 0xA1);	/* 8259A-2 is a slave on master's IR2，0x20 = 0000_0010，指定主片的哪个接口连接从片 */
+	outb(0x01, 0xA1);	/* (slave's support for AEOI in flat mode
 				    is to be investigated)，表示 x86 处理器 */
 
 	if (auto_eoi)
@@ -318,8 +321,10 @@ void init_8259A(int auto_eoi)
 
 	udelay(100);		/* wait for 8259A to initialize */
 
-	outb(cached_21, 0x21);	/* restore master IRQ mask */
-	outb(cached_A1, 0xA1);	/* restore slave IRQ mask */
+	// outb(cached_21, 0x21);	/* restore master IRQ mask */
+	// outb(cached_A1, 0xA1);	/* restore slave IRQ mask */
+	outb(0xf8, 0x21);	/* restore master IRQ mask */
+    outb(0xbf, 0xA1);	/* restore slave IRQ mask */
 
 	spin_unlock_irqrestore(&i8259A_lock, flags);
 }
@@ -361,13 +366,17 @@ void init_IRQ(void)
 			set_intr_gate(vector, interrupt[i]);
 	}
 
+	/* 加载idt */
+    uint64_t idt_operand = ((sizeof(idt_table) - 1) | ((uint64_t)(uint32_t)idt_table << 16));
+    asm volatile("lidt %0" : : "m" (idt_operand));
+
 	/*
 	 * Set the clock to HZ Hz, we already have a valid
 	 * vector now:
 	 */
-	outb_p(0x34,0x43);				/* binary, mode 2, LSB/MSB, ch 0 */
-	outb_p(LATCH & 0xff , 0x40);	/* LSB */
-	outb(LATCH >> 8 , 0x40);		/* MSB */
+	outb_p(0x34,0x43);				/* binary, mode 2, LSB/MSB, ch 0 ，写计数器0的控制字，工作方式2 */
+	outb_p(LATCH & 0xff , 0x40);	/* LSB，写计数初值 LSB，计数初值低位字节 */
+	outb(LATCH >> 8 , 0x40);		/* MSB，写计数初值 MSB 计数初值高位字节 */
 
 // #ifndef CONFIG_VISWS
 	// setup_irq(2, &irq2);
