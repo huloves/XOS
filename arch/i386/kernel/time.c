@@ -30,8 +30,6 @@ static inline void do_timer_interrupt(int irq, void *dev_id, struct pt_regs *reg
 */
 static void timer_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
-	printk("%s, happen\n", __func__);
-	// while(1);
 	do_timer_interrupt(irq, dev_id, regs);
 }
 

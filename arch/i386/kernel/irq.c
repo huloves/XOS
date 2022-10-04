@@ -80,8 +80,7 @@ struct hw_interrupt_type no_irq_type = {
 	end_none
 };
 
-// atomic_t irq_err_count;
-volatile unsigned long irq_err_count;
+atomic_t irq_err_count;
 
 /*
  * Generic enable/disable code: this just calls
@@ -125,7 +124,6 @@ inline void disable_irq_nosync(unsigned int irq)
 int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction * action)
 {
 	int status;
-	// int cpu = smp_processor_id();
 	int cpu = 0;
 
 	irq_enter(irq);
@@ -156,7 +154,6 @@ int handle_IRQ_event(unsigned int irq, struct pt_regs * regs, struct irqaction *
  */
 asmlinkage unsigned int do_IRQ(struct pt_regs regs)
 {	
-	printk("1111111\n");
 	/* 
 	 * We ack quickly, we don't want the irq controller
 	 * thinking we're snobs just because some other CPU has

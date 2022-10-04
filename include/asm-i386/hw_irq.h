@@ -21,8 +21,7 @@
 extern void disable_8259A_irq(unsigned int irq);
 extern void enable_8259A_irq(unsigned int irq);
 
-// extern atomic_t irq_err_count;
-extern volatile unsigned long irq_err_count;
+extern atomic_t irq_err_count;
 
 #define IRQ_NAME2(nr) nr##_interrupt(void)
 #define IRQ_NAME(nr) IRQ_NAME2(IRQ##nr)
