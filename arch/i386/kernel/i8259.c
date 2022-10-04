@@ -58,13 +58,6 @@ BUILD_16_IRQS(0xc) BUILD_16_IRQS(0xd)
 
 void (*interrupt[NR_IRQS])(void) = {
 	IRQLIST_16(0x0),   // 将会被替换为 IRQ0x00_interrupt, IRQ0x01_interrupt ... IRQ0x0f_interrupt
-
-#ifdef CONFIG_X86_IO_APIC
-			 IRQLIST_16(0x1), IRQLIST_16(0x2), IRQLIST_16(0x3),
-	IRQLIST_16(0x4), IRQLIST_16(0x5), IRQLIST_16(0x6), IRQLIST_16(0x7),
-	IRQLIST_16(0x8), IRQLIST_16(0x9), IRQLIST_16(0xa), IRQLIST_16(0xb),
-	IRQLIST_16(0xc), IRQLIST_16(0xd)
-#endif
 };
 
 extern struct desc_struct idt_table[256];
@@ -321,10 +314,10 @@ void init_8259A(int auto_eoi)
 
 	udelay(100);		/* wait for 8259A to initialize */
 
-	// outb(cached_21, 0x21);	/* restore master IRQ mask */
-	// outb(cached_A1, 0xA1);	/* restore slave IRQ mask */
-	outb(0xf8, 0x21);	/* restore master IRQ mask */
-    outb(0xbf, 0xA1);	/* restore slave IRQ mask */
+	outb(cached_21, 0x21);	/* restore master IRQ mask */
+	outb(cached_A1, 0xA1);	/* restore slave IRQ mask */
+	// outb(0xf8, 0x21);	/* restore master IRQ mask */
+    // outb(0xbf, 0xA1);	/* restore slave IRQ mask */
 
 	spin_unlock_irqrestore(&i8259A_lock, flags);
 }
@@ -378,15 +371,5 @@ void init_IRQ(void)
 	outb_p(LATCH & 0xff , 0x40);	/* LSB，写计数初值 LSB，计数初值低位字节 */
 	outb(LATCH >> 8 , 0x40);		/* MSB，写计数初值 MSB 计数初值高位字节 */
 
-// #ifndef CONFIG_VISWS
-	// setup_irq(2, &irq2);
-// #endif
-
-	/*
-	 * External FPU? Set up irq13 if so, for
-	 * original braindamaged IBM FERR coupling.
-	 */
-	// if (boot_cpu_data.hard_math && !cpu_has_fpu)
-		// setup_irq(13, &irq13);
 	printk("init_IRQ down.\n");
 }
