@@ -211,6 +211,7 @@ static void bh_action(unsigned long nr)
 
 	hardirq_endlock();
 	spin_unlock(&global_bh_lock);
+	return;
 
 resched_unlock:
 	spin_unlock(&global_bh_lock);
@@ -235,4 +236,6 @@ void softirq_init()
 	for (i = 0; i < 32; i++) {
 		tasklet_init(bh_task_vec + i, bh_action, i);
 	}
+	open_softirq(TASKLET_SOFTIRQ, tasklet_action, NULL);
+    open_softirq(HI_SOFTIRQ, tasklet_hi_action, NULL);
 }

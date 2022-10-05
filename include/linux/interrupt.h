@@ -77,6 +77,8 @@ static inline void __cpu_raise_softirq(int cpu, int nr)
 	softirq_active() |= (1<<nr);
 }
 
+extern void softirq_init(void);
+
 /* Tasklets --- multithreaded analogue of BHs.
 
    Main feature differing them of generic softirqs: tasklet

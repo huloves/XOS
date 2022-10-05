@@ -1,6 +1,7 @@
 #include <linux/sched.h>
 #include <linux/kernel_stat.h>
 #include <linux/interrupt.h>
+#include <asm-i386/stdio.h>
 
 extern void timer_bh(void);
 

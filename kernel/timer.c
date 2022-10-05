@@ -5,6 +5,7 @@
 #include <linux/interrupt.h>
 #include <asm-i386/stdio.h>
 #include <linux/list.h>
+#include <asm-i386/system.h>
 
 /*
  * Timekeeping variables
@@ -194,5 +195,5 @@ void do_timer(struct pt_regs *regs)
 	(*(unsigned long *)&jiffies)++;
 	printk("jiffies = %ld\n", jiffies);
 	// update_process_times();   // 与进程调度有关
-	// mark_bh(TIMER_BH);
+	mark_bh(TIMER_BH);
 }
