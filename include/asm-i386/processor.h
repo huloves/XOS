@@ -161,7 +161,7 @@ struct tss_struct {
 
 #define INIT_TSS  {						\
 	0,0, /* back_link, __blh */				\
-	sizeof(init_stack) + (long) &init_stack, /* esp0 */	\
+	sizeof(init_stack) + (long) &init_task, /* esp0 */	\
 	__KERNEL_DS, 0, /* ss0 */				\
 	0,0,0,0,0,0, /* stack1, stack2 */			\
 	0, /* cr3 */						\
