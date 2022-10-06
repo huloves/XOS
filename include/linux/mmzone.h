@@ -34,41 +34,16 @@ typedef struct zone_struct {
 	/*
 	 * Commonly accessed fields:
 	 */
-	spinlock_t		lock;   // 并行访问时保护该管理区的自旋锁
+	spinlock_t			lock;   	  // 并行访问时保护该管理区的自旋锁
 	unsigned long		free_pages;   // 该管理区中空闲页面的总数
 	unsigned long		pages_min, pages_low, pages_high;   // 管理区极值
-	int			need_balance;   // 当可用页面的数量到达管理区极值的某一个值时，就需要平衡该管理区
+	int					need_balance;   // 当可用页面的数量到达管理区极值的某一个值时，就需要平衡该管理区
 
 	/*
 	 * free areas of different sizes
 	 */
-	free_area_t		free_area[MAX_ORDER];   // 空闲区域位图，由伙伴分配器使用
+	free_area_t			free_area[MAX_ORDER];   // 空闲区域位图，由伙伴分配器使用
 
-	/*
-	 * wait_table		-- the array holding the hash table
-	 * wait_table_size	-- the size of the hash table array
-	 * wait_table_shift	-- wait_table_size
-	 * 				== BITS_PER_LONG (1 << wait_table_bits)
-	 *
-	 * The purpose of all these is to keep track of the people
-	 * waiting for a page to become available and make them
-	 * runnable again when possible. The trouble is that this
-	 * consumes a lot of space, especially when so few things
-	 * wait on pages at a given time. So instead of using
-	 * per-page waitqueues, we use a waitqueue hash table.
-	 *
-	 * The bucket discipline is to sleep on the same queue when
-	 * colliding and wake all in that wait queue when removing.
-	 * When something wakes, it must check to be sure its page is
-	 * truly available, a la thundering herd. The cost of a
-	 * collision is great, but given the expected load of the
-	 * table, they should be so rare as to be outweighed by the
-	 * benefits from the saved space.
-	 *
-	 * __wait_on_page() and unlock_page() in mm/filemap.c, are the
-	 * primary users of these fields, and in mm/page_alloc.c
-	 * free_area_init_core() performs the initialization of them.
-	 */
 	// wait_queue_head_t	* wait_table;   // 等待队列的哈希表，该队列由等待页面释放的进程组成。it's important for wait_on_page() and unlock_page()
 	unsigned long		wait_table_size;    // 该哈希表的大小，是2的幂
 	unsigned long		wait_table_shift;   // long型所对应的位数减去上述表大小的二进制对数。
@@ -76,7 +51,7 @@ typedef struct zone_struct {
 	/*
 	 * Discontig memory support fields.
 	 */
-	struct pglist_data	*zone_pgdat;   // 指向父 pg_data_t
+	struct pglist_data	*zone_pgdat;   // 指向所属 pg_data_t
 	struct page			*zone_mem_map;   // 涉及的管理区在全局 mem_map 中的第一页
 	unsigned long		zone_start_paddr;   // 管理区的起始物理地址。更好的类型是PFN（页面帧号），一个PFN是一个简单的物理内存索引，以页面大小为基础的单位计算。PFN一般定义为 (page_phys_addr >> PAGE_SHIFT)
 	unsigned long		zone_start_mapnr;   // 指出该管理区在全局 mem_map 中的页面偏移。在 free_area_init_core() 中，通过计算 mem_map 与该管理区的局部 mem_map 中称为 lmem_map 之间的页面数，从而得到页面偏移。
@@ -125,14 +100,14 @@ struct bootmem_data;
 typedef struct pglist_data {
 	zone_t node_zones[MAX_NR_ZONES];
 	zonelist_t node_zonelists[GFP_ZONEMASK+1];
-	int nr_zones;
-	struct page *node_mem_map;
+	int nr_zones;   // 表示该节点中管理区数目，1~3
+	struct page *node_mem_map;   // 指 struct page 中第一个页面
 	unsigned long *valid_addr_bitmap;
 	struct bootmem_data *bdata;
-	unsigned long node_start_paddr;
-	unsigned long node_start_mapnr;
+	unsigned long node_start_paddr;   // 节点的起始物理地址
+	unsigned long node_start_mapnr;   // 该节点在全局 mem_map 中的页面偏移
 	unsigned long node_size;
-	int node_id;
+	int node_id;   // 节点ID
 	struct pglist_data *node_next;
 } pg_data_t;
 
