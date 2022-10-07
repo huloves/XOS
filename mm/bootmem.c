@@ -34,7 +34,7 @@ static unsigned long init_bootmem_core (pg_data_t *pgdat,
 {
 	printk("bootmem_data_t init start.\n");
 	bootmem_data_t *bdata = pgdat->bdata;   // pg_data_t contig_page_data = { bdata: &contig_bootmem_data };
-	unsigned long mapsize = ((end - start)+7)/8;   // 计算内存页位图的大小（以字节为单位），end = max_low_pfn，start = 0
+	unsigned long mapsize = ((end - start + 1)+7)/8;   // 计算内存页位图的大小（以字节为单位），end = max_low_pfn，start = 0
 	// printk("old mapsize = %d\n", mapsize);
 
 	pgdat->node_next = pgdat_list;   // 把 pgdat_data_t 插入到 pgdat_list 链表中
@@ -45,7 +45,7 @@ static unsigned long init_bootmem_core (pg_data_t *pgdat,
 	bdata->node_bootmem_map = phys_to_virt(mapstart << PAGE_SHIFT);   // 初始化位图的起始地址，该位图用于表示页面的使用情况
 	// printk("node_bootmem_map = %x\n", bdata->node_bootmem_map);
 	bdata->node_boot_start = (start << PAGE_SHIFT);   // 记录该节点的起始地址
-	bdata->node_low_pfn = end;   // 记录该节点的结束地址
+	bdata->node_low_pfn = end;   // 记录该节点的结束PFN
 
 	/*
 	 * Initially all pages are reserved - setup_arch() has to

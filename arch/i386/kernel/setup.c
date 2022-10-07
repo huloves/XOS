@@ -22,7 +22,7 @@ unsigned long mmu_cr4_features;   // extern in include/asm-i386/processor.h
 /* For PCI or other memory-mapped resources */
 unsigned long pci_mem_start = 0x10000000;
 
-#define PFN_UP(x) (((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
+#define PFN_UP(x) 	(((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x) ((x) >> PAGE_SHIFT)
 #define PFN_PHYS(x) ((x) << PAGE_SHIFT)
 
@@ -393,10 +393,10 @@ static void setup_memory_region(void)
 	
 	init_biosmap();
 	printk("biosmap.map = %p, biosmap.nr_map = %d\n", biosmap.map, biosmap.nr_map);
-	sanitize_e820_map(biosmap.map, &biosmap.nr_map);
-	copy_e820_map(biosmap.map, biosmap.nr_map);
+	sanitize_e820_map(biosmap.map, &biosmap.nr_map);   // 对整个表排序
+	copy_e820_map(biosmap.map, biosmap.nr_map);   // 将biosmap中的内容复制到e820中
 	printk("BIOS-provided physical RAM map:\n");
-	print_memory_map(who);
+	print_memory_map(who);   // 打印e820内存信息
 }
 
 /*
