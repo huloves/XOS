@@ -20,6 +20,6 @@ void start_kernel(void)
     sched_init();
     time_init();
     softirq_init();
-    sti();
+    sti();   //
     while(1);
 }
