@@ -442,5 +442,5 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 
 void free_area_init(unsigned long *zones_size)
 {
-	free_area_init_core(0, &contig_page_data, &mem_map, zones_size, 0, 0, 0);
+	free_area_init_core(0, &contig_page_data, &mem_map, zones_size, 0, 0, 0);   // mem_map用于跟踪struct page的全局mem_map，free_area_init_core()将为该数据分配内存
 }
