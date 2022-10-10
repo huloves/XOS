@@ -316,7 +316,7 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 		lmem_map = (struct page *)(PAGE_OFFSET + 
 			MAP_ALIGN((unsigned long)lmem_map - PAGE_OFFSET));
 	}
-	*gmap = pgdat->node_mem_map = lmem_map;
+	*gmap = pgdat->node_mem_map = lmem_map;   // mem_map赋值
 	pgdat->node_size = totalpages;   // 记录节点大小
 	pgdat->node_start_paddr = zone_start_paddr;   // 记录起始物理地址
 	pgdat->node_start_mapnr = (lmem_map - mem_map);   // 记录节点所占 mem_map 中的偏移
