@@ -10,6 +10,7 @@
 #include <asm-i386/io.h>
 #include <asm-i386/dma.h>
 #include <linux/mm.h>
+#include <linux/string.h>
 
 pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE)));
 // int a[1024];
@@ -111,6 +112,13 @@ static void set_max_mapnr_init(void)
 	max_mapnr = num_mappedpages = num_physpages = max_low_pfn;
 }
 
+static int free_pages_init(void)
+{
+	int reservedpages, pfn;
+
+	/* this will put all low memory onto the freelists */
+}
+
 void mem_init()
 {
 	int codesize, reservedpages, datasize, initsize;
@@ -119,4 +127,11 @@ void mem_init()
 	if(!mem_map) { 
 		BUG();
 	}
+
+	set_max_mapnr_init();
+
+	high_memory = (void*) __va(max_low_pfn * PAGE_SIZE);
+
+	/* clear the zero-page */
+	memset(empty_zero_page, 0, PAGE_SIZE);
 }
