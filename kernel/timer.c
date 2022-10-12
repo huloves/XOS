@@ -186,14 +186,14 @@ repeat:
 
 void timer_bh(void)
 {
-	printk("timer_bh happen\n");
+	// printk("timer_bh happen\n");
 	run_timer_list();   // 检查系统中已经设置了的定时器，如果某个定时器到点就执行预定的函数
 }
 
 void do_timer(struct pt_regs *regs)
 {
 	(*(unsigned long *)&jiffies)++;
-	printk("jiffies = %ld\n", jiffies);
+	// printk("jiffies = %ld\n", jiffies);
 	// update_process_times();   // 与进程调度有关
 	mark_bh(TIMER_BH);
 }

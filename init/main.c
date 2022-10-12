@@ -4,6 +4,7 @@
 #include <linux/sched.h>
 #include <asm-i386/system.h>
 #include <linux/interrupt.h>
+#include <linux/mm.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -21,5 +22,6 @@ void start_kernel(void)
     time_init();
     softirq_init();
     sti();   //
+    mem_init();
     while(1);
 }

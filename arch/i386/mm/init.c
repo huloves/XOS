@@ -105,3 +105,18 @@ void paging_init(void)
 	zone_sizes_init();
 	printk("paging_init down.\n");
 }
+
+static void set_max_mapnr_init(void)
+{
+	max_mapnr = num_mappedpages = num_physpages = max_low_pfn;
+}
+
+void mem_init()
+{
+	int codesize, reservedpages, datasize, initsize;
+	int tmp;
+
+	if(!mem_map) { 
+		BUG();
+	}
+}

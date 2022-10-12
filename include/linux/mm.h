@@ -332,4 +332,6 @@ static inline struct page * alloc_pages(unsigned int gfp_mask, unsigned int orde
 
 extern unsigned long __get_free_pages(int gfp_mask, unsigned long order);
 
+extern void mem_init(void);
+
 #endif
