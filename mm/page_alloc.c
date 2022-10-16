@@ -47,8 +47,8 @@ static inline struct page * expand (zone_t *zone, struct page *page,
         area--;
         high--;
         size >>= 1;
-        list_add(&(page)->list, &(area)->free_list);
-        MARK_USED(index, high, area);
+        list_add(&(page)->list, &(area)->free_list);   // 把分裂出来的一块内存块添加到下一级空闲链表中
+        MARK_USED(index, high, area);   // 标记伙伴标志位为占用
         index += size;
         page += size;
     }
@@ -219,6 +219,20 @@ unsigned long __get_free_pages(int gfp_mask, unsigned long order)
     if (!page)
         return 0;
     return (unsigned long) page_address(page);
+}
+
+unsigned long get_zeroed_page(unsigned int gfp_mask)
+{
+	struct page *page;
+
+	page = alloc_pages(gfp_mask, 0);
+	if (page) {
+		void *address = page_address(page);
+		clear_page(address);
+		return (unsigned long) address;
+	}
+	
+	return 0;
 }
 
 /*

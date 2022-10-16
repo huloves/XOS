@@ -5,6 +5,9 @@
 #define PAGE_SIZE	(1UL << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
 
+#define clear_page(page) memset((void*)(page), 0, PAGE_SIZE)
+#define copy_page(to, from) memcpy((void*)(to), (void*)(from), PAGE_SIZE)
+
 /*
  * This handles the memory map.. We could make this a config
  * option, but too many people screw it up, and too few need
