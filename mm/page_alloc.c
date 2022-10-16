@@ -7,6 +7,8 @@
 #include <linux/list.h>
 #include <linux/string.h>
 #include <asm-i386/bitops.h>
+#include <asm-i386/current.h>
+#include <linux/sched.h>
 
 pg_data_t *pgdat_list;
 
@@ -32,6 +34,94 @@ static int zone_balance_max[MAX_NR_ZONES]  = { 255 , 255, 255, };
 	|| (((page) - mem_map) < (zone)->zone_start_mapnr)				\
 	|| ((zone) != page_zone(page))									\
 )
+
+static void __free_pages_ok(struct page *page, unsigned int order)
+{
+	unsigned long index, page_idx, mask, flags;
+	free_area_t *area;
+	struct page *base;
+	zone_t *zone;
+
+	// if (PageLRU(page)) {
+	// 	if (unlikely(in_interrupt()))
+	// 		BUG();
+	// 	lru_cache_del(page);
+	// }
+
+	// if (page->buffers)
+	// 	BUG();
+	// if (page->mapping)
+	// 	BUG();
+	if (!VALID_PAGE(page))
+		BUG();
+	if (PageLocked(page))
+		BUG();
+	if (PageActive(page))
+		BUG();
+	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
+
+	if (current->flags & PF_FREE_PAGES)
+		goto local_freelist;
+back_local_freelist:
+
+	zone = page_zone(page);
+	mask = (~0UL) << order;   // 获取一个后order个位为0的长整型数字
+	base = zone->zone_mem_map;   // 获取内存管理区管理的开始内存页
+	page_idx = page - base;   // 当前页面在内存管理区的索引
+	if (page_idx & ~mask)
+		BUG();
+	index = page_idx >> (1 + order);   // 伙伴标记位索引
+
+	area = zone->free_area + order;   // 内存块所在的空闲链表
+
+	spin_lock_irqsave(&zone->lock, flags);
+
+	zone->free_pages -= mask;   // 添加释放的内存块所占用的内存页数
+
+	while (mask + (1 << (MAX_ORDER-1))) {   // 遍历(MAX_ORDER-order-1, MAX_ORDER等于10)次, 也就是说最多循环9次
+		struct page *buddy1, *buddy2;
+
+		if (area >= zone->free_area + MAX_ORDER)
+			BUG();
+		if (!__test_and_change_bit(index, area->map))
+			/*
+			 * the buddy page is still allocated.
+			 */
+			break;
+		/*
+		 * Move the buddy up one level.
+		 * This code is taking advantage of the identity:
+		 * 	-mask = 1+~mask
+		 */
+		buddy1 = base + (page_idx ^ -mask);
+		buddy2 = base + page_idx;
+		if (BAD_RANGE(zone,buddy1))
+			BUG();
+		if (BAD_RANGE(zone,buddy2))
+			BUG();
+
+		list_del(&buddy1->list);
+		mask <<= 1;
+		area++;
+		index >>= 1;
+		page_idx &= mask;
+	}
+	list_add(&(base + page_idx)->list, &area->free_list);
+
+	spin_unlock_irqrestore(&zone->lock, flags);
+	return;
+
+local_freelist:
+	// if (current->nr_local_pages)
+	// 	goto back_local_freelist;
+	// if (in_interrupt())
+	// 	goto back_local_freelist;		
+
+	// list_add(&page->list, &current->local_pages);
+	// page->index = order;
+	// current->nr_local_pages++;
+	return;
+}
 
 #define MARK_USED(index, order, area) \
 	__change_bit((index) >> (1+(order)), (area)->map)
@@ -231,7 +321,7 @@ unsigned long get_zeroed_page(unsigned int gfp_mask)
 		clear_page(address);
 		return (unsigned long) address;
 	}
-	
+
 	return 0;
 }
 
