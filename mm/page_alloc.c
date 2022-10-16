@@ -59,7 +59,7 @@ static inline struct page * expand (zone_t *zone, struct page *page,
 
 static struct page * rmqueue(zone_t *zone, unsigned int order)
 {
-    free_area_t * area = zone->free_area + order;
+    free_area_t * area = zone->free_area + order;   // 获取申请对应大小内存块的空闲列表
     unsigned int curr_order = order;
     struct list_head *head, *curr;
     unsigned long flags;
@@ -67,21 +67,22 @@ static struct page * rmqueue(zone_t *zone, unsigned int order)
 
     spin_lock_irqsave(&zone->lock, flags);
     do {
-        head = &area->free_list;
+        head = &area->free_list;   // 空闲内存链表
         curr = head->next;
 
-        if (curr != head) {
+        if (curr != head) {   // 判断链表是否为空
             unsigned int index;
 
-            page = list_entry(curr, struct page, list);
+            page = list_entry(curr, struct page, list);   // 当前内存块
             if (BAD_RANGE(zone,page))
                 BUG();
             list_del(curr);
-            index = page - zone->zone_mem_map;
+            index = page - zone->zone_mem_map;   // 计算内存块在管理区的索引
             if (curr_order != MAX_ORDER-1)
-                MARK_USED(index, curr_order, area);
-            zone->free_pages -= 1UL << order;
+                MARK_USED(index, curr_order, area);   // 减去内存块所占用的内存页数
+            zone->free_pages -= 1UL << order;   // 减去内存块所占用的内存页数
 
+			// 把更大的内存块分裂为申请大小的内存块
             page = expand(zone, page, index, order, curr_order, area);
             spin_unlock_irqrestore(&zone->lock, flags);
 
@@ -94,6 +95,7 @@ static struct page * rmqueue(zone_t *zone, unsigned int order)
                 BUG();
             return page;
         }
+		// 如果当前空闲链表中没有空闲的块，那么向空间更大的内存块链表中申请
         curr_order++;
         area++;
     } while (curr_order < MAX_ORDER);
@@ -205,7 +207,7 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 struct page *_alloc_pages(unsigned int gfp_mask, unsigned int order)
 {
     return __alloc_pages(gfp_mask, order,
-                         contig_page_data.node_zonelists+(gfp_mask & GFP_ZONEMASK));
+                         contig_page_data.node_zonelists+(gfp_mask & GFP_ZONEMASK));   // gfp_mask的低4位表明那个管理区适合分配
 }
 
 /* common helper function */
