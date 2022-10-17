@@ -341,6 +341,20 @@ extern unsigned long get_zeroed_page(unsigned int gfp_mask);
 #define __get_dma_pages(gfp_mask, order) \
 		__get_free_pages((gfp_mask) | GFP_DMA,(order))
 
+/*
+ * The old interface name will be removed in 2.5:
+ */
+#define get_free_page get_zeroed_page
+
+/*
+ * There is only one 'core' page-freeing function.
+ */
+extern void __free_pages(struct page *page, unsigned int order);
+extern void free_pages(unsigned long addr, unsigned int order);
+
+#define __free_page(page) __free_pages((page), 0)
+#define free_page(addr) free_pages((addr),0)
+
 extern void mem_init(void);
 
 #endif

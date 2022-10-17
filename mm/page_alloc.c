@@ -197,6 +197,7 @@ static struct page * rmqueue(zone_t *zone, unsigned int order)
 /* This is the 'heart' of the zoned buddy allocator: */
 struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
 {
+	printk("%s: %d: zonelist = 0x%p\n", __func__, __LINE__, zonelist);
 	unsigned long min;
 	zone_t **zone, * classzone;
 	struct page * page;
@@ -209,10 +210,13 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 	min = 1UL << order;
 	for (;;) {
 		zone_t *z = *(zone++);
+		printk("z = %p\n", z);
 		if (!z)
 			break;
 
 		min += z->pages_low;
+		printk("min = %d\n", min);
+		printk("z->free_pages = %d\n", z->free_pages);
 		if (z->free_pages > min) {
 			page = rmqueue(z, order);
 			if (page)
@@ -325,6 +329,20 @@ unsigned long get_zeroed_page(unsigned int gfp_mask)
 	return 0;
 }
 
+void __free_pages(struct page *page, unsigned int order)
+{
+	if (!PageReserved(page) && put_page_testzero(page)) {
+		printk("OPPPPP\n");
+		__free_pages_ok(page, order);
+	}
+}
+
+void free_pages(unsigned long addr, unsigned int order)
+{
+	if (addr != 0)
+		__free_pages(virt_to_page(addr), order);
+}
+
 /*
  * Builds allocation fallback zone lists.
  */
@@ -365,6 +383,7 @@ static inline void build_zonelists(pg_data_t *pgdat)
 				zone = pgdat->node_zones + ZONE_NORMAL;
 				if (zone->size)
 					zonelist->zones[j++] = zone;
+				// printk("zone = %p\n", zone);
 			case ZONE_DMA:
 				zone = pgdat->node_zones + ZONE_DMA;
 				if (zone->size)
@@ -429,6 +448,9 @@ void free_area_init_core(int nid, pg_data_t *pgdat, struct page **gmap,
 	pgdat->nr_zones = 0;   // 初始化管理区计数为 0，将在函数的后面设置
 
 	offset = lmem_map - mem_map;   // offset 是 lmem_map 开始的局部部分相对 mem_map 的偏移
+	printk("lmem_map = %p\n", lmem_map);
+	printk("mem_map  = %p\n", mem_map);
+	printk("offset = %d\n", offset);
 	for (j = 0; j < MAX_NR_ZONES; j++) {   // 循环处理节点中的每个 zone_t
 		zone_t *zone = pgdat->node_zones + j;
 		unsigned long mask;
