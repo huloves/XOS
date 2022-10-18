@@ -19,6 +19,7 @@
 #include <linux/debug.h>
 #include <asm-i386/bitops.h>
 #include <linux/debug.h>
+#include <linux/mm.h>
 
 unsigned long max_low_pfn;
 unsigned long min_low_pfn;
@@ -229,6 +230,46 @@ found:
 	return ret;
 }
 
+static unsigned long free_all_bootmem_core(pg_data_t *pgdat)
+{
+	struct page *page = pgdat->node_mem_map;
+	bootmem_data_t *bdata = pgdat->bdata;
+	unsigned long i, count, total = 0;
+	unsigned long idx;
+
+	if (!bdata->node_bootmem_map) BUG();
+
+	count = 0;
+	idx = bdata->node_low_pfn - (bdata->node_boot_start >> PAGE_SHIFT);
+	for (i = 0; i < idx; i++, page++) {
+		// printk("sssssss\n");
+		if (!test_bit(i, bdata->node_bootmem_map)) {
+			count++;
+			ClearPageReserved(page);
+			set_page_count(page, 1);
+			__free_page(page);
+		}
+	}
+	total += count;
+
+	/*
+	 * Now free the allocator bitmap itself, it's not
+	 * needed anymore:
+	 */
+	page = virt_to_page(bdata->node_bootmem_map);
+	count = 0;
+	for (i = 0; i < ((bdata->node_low_pfn-(bdata->node_boot_start >> PAGE_SHIFT))/8 + PAGE_SIZE-1)/PAGE_SIZE; i++,page++) {
+		count++;
+		ClearPageReserved(page);
+		set_page_count(page, 1);
+		__free_page(page);
+	}
+	total += count;
+	bdata->node_bootmem_map = NULL;
+
+	return total;
+}
+
 unsigned long init_bootmem (unsigned long start, unsigned long pages)
 {
 	max_low_pfn = pages;
@@ -244,6 +285,11 @@ void free_bootmem(unsigned long addr, unsigned long size)
 void reserve_bootmem (unsigned long addr, unsigned long size)
 {
 	return(reserve_bootmem_core(contig_page_data.bdata, addr, size));
+}
+
+unsigned long free_all_bootmem (void)
+{
+	return(free_all_bootmem_core(&contig_page_data));
 }
 
 void * __alloc_bootmem (unsigned long size, unsigned long align, unsigned long goal)

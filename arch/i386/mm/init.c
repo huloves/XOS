@@ -12,6 +12,10 @@
 #include <linux/mm.h>
 #include <linux/string.h>
 
+unsigned long highstart_pfn, highend_pfn;
+static unsigned long totalram_pages;
+static unsigned long totalhigh_pages;
+
 pgd_t swapper_pg_dir[1024] __attribute__((__aligned__(PAGE_SIZE)));
 // int a[1024];
 // pgd_t b[1024]__attribute__((__aligned__(PAGE_SIZE)));
@@ -134,4 +138,8 @@ void mem_init()
 
 	/* clear the zero-page */
 	memset(empty_zero_page, 0, PAGE_SIZE);
+
+	/* this will put all low memory onto the freelists */
+	totalram_pages += free_all_bootmem();
+	printk("%s: %d: totalram_pages = %d\n", __func__, __LINE__, totalram_pages);
 }

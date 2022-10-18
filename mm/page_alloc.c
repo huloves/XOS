@@ -332,7 +332,7 @@ unsigned long get_zeroed_page(unsigned int gfp_mask)
 void __free_pages(struct page *page, unsigned int order)
 {
 	if (!PageReserved(page) && put_page_testzero(page)) {
-		printk("OPPPPP\n");
+		// printk("OPPPPP\n");
 		__free_pages_ok(page, order);
 	}
 }
