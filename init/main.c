@@ -22,11 +22,13 @@ void start_kernel(void)
     sched_init();
     time_init();
     softirq_init();
-    // sti();   //
+    sti();   //
+
+    mem_init();
+
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, mem_map);
-
-    mem_init();
+    
     while(1);
 }

@@ -11,6 +11,7 @@
 #include <asm-i386/dma.h>
 #include <linux/mm.h>
 #include <linux/string.h>
+#include <asm-i386/e820.h>
 
 unsigned long highstart_pfn, highend_pfn;
 static unsigned long totalram_pages;
@@ -123,6 +124,30 @@ static int free_pages_init(void)
 	/* this will put all low memory onto the freelists */
 }
 
+static inline int page_is_ram (unsigned long pagenr)
+{
+	int i;
+
+	for (i = 0; i < e820.nr_map; i++) {
+		unsigned long addr, end;
+
+		if (e820.map[i].type != E820_RAM)	/* not usable memory */
+			continue;
+		/*
+		 *	!!!FIXME!!! Some BIOSen report areas as RAM that
+		 *	are not. Notably the 640->1Mb area. We need a sanity
+		 *	check here.
+		 */
+		addr = (e820.map[i].addr+PAGE_SIZE-1) >> PAGE_SHIFT;
+		end = (e820.map[i].addr+e820.map[i].size) >> PAGE_SHIFT;
+		if  ((pagenr >= addr) && (pagenr < end))
+			return 1;
+	}
+	return 0;
+}
+
+extern char _text, _etext, _edata, _end, _start;
+
 void mem_init()
 {
 	int codesize, reservedpages, datasize, initsize;
@@ -142,4 +167,26 @@ void mem_init()
 	/* this will put all low memory onto the freelists */
 	totalram_pages += free_all_bootmem();
 	printk("%s: %d: totalram_pages = %d\n", __func__, __LINE__, totalram_pages);
+	
+	reservedpages = 0;
+	for (tmp = 0; tmp < max_low_pfn; tmp++) {
+		/*
+		 * Only count reserved RAM pages
+		 */
+		if (page_is_ram(tmp) && PageReserved(mem_map+tmp))
+			reservedpages++;
+	}
+
+	// printk("Memory: k/%luk available (%dk kernel code, %dk reserved, %dk data, %ldk highmem)\n",
+	// 	// (unsigned long) nr_free_pages() << (PAGE_SHIFT-10),
+	// 	max_mapnr << (PAGE_SHIFT-10),
+	// 	codesize >> 10,
+	// 	reservedpages << (PAGE_SHIFT-10),
+	// 	datasize >> 10,
+	// 	(unsigned long) (totalhigh_pages << (PAGE_SHIFT-10))
+	//        );
+
+	printk("kernel in memory start: 0x%08X\n", &_start);
+    printk("kernel in memory end:   0x%08X\n", &_end - 0xc0000000);
+    printk("kernel in memory used:   %d KB\n\n", (&_end - 0xc0000000 - &_start + 1023) / 1024);
 }

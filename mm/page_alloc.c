@@ -197,7 +197,7 @@ static struct page * rmqueue(zone_t *zone, unsigned int order)
 /* This is the 'heart' of the zoned buddy allocator: */
 struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_t *zonelist)
 {
-	printk("%s: %d: zonelist = 0x%p\n", __func__, __LINE__, zonelist);
+	// printk("%s: %d: zonelist = 0x%p\n", __func__, __LINE__, zonelist);
 	unsigned long min;
 	zone_t **zone, * classzone;
 	struct page * page;
@@ -215,8 +215,8 @@ struct page * __alloc_pages(unsigned int gfp_mask, unsigned int order, zonelist_
 			break;
 
 		min += z->pages_low;
-		printk("min = %d\n", min);
-		printk("z->free_pages = %d\n", z->free_pages);
+		// printk("min = %d\n", min);
+		// printk("z->free_pages = %d\n", z->free_pages);
 		if (z->free_pages > min) {
 			page = rmqueue(z, order);
 			if (page)
