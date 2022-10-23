@@ -7,6 +7,7 @@
 #include <linux/mm.h>
 #include <linux/bootmem.h>
 #include <linux/slab.h>
+#include <linux/kernel.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -27,6 +28,11 @@ void start_kernel(void)
     sti();   //
 
     mem_init();
+    char name[100];
+    char *str = "world";
+    snprintf(name, sizeof(name), "hello %d!", 100);
+    printk("name = %s\n", name);
+    // kmem_cache_sizes_init();
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);

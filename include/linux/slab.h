@@ -23,5 +23,6 @@ typedef struct kmem_cache_s kmem_cache_t;
 
 /* prototypes */
 extern void kmem_cache_init(void);
+extern void kmem_cache_sizes_init(void);
 
 #endif
