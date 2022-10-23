@@ -6,6 +6,7 @@
 #include <linux/interrupt.h>
 #include <linux/mm.h>
 #include <linux/bootmem.h>
+#include <linux/slab.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -22,6 +23,7 @@ void start_kernel(void)
     sched_init();
     time_init();
     softirq_init();
+    kmem_cache_init();
     sti();   //
 
     mem_init();
