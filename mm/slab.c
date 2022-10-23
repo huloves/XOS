@@ -101,35 +101,35 @@ struct kmem_cache_s {
 	struct list_head	slabs_full;
 	struct list_head	slabs_partial;
 	struct list_head	slabs_free;
-	unsigned int		objsize;
-	unsigned int	 	flags;	/* constant flags */
-	unsigned int		num;	/* # of objs per slab */
+	unsigned int		objsize;   // slab中每个对象的大小
+	unsigned int	 	flags;	/* constant flags */ // 决定分配器应该如何处理高速缓存
+	unsigned int		num;	/* # of objs per slab */   // 每一个slab中包含的对象个数
 	spinlock_t			spinlock;
 #ifdef CONFIG_SMP
-	unsigned int		batchcount;
+	unsigned int		batchcount;   //为per-cpu高速缓存批量分配对象的数目
 #endif
 
 /* 2) slab additions /removals */
 	/* order of pgs per slab (2^n) */
-	unsigned int		gfporder;
+	unsigned int		gfporder;   // 表示slab的大小（以页为单位）
 
 	/* force GFP flags, e.g. GFP_DMA */
-	unsigned int		gfpflags;
+	unsigned int		gfpflags;   // 调用伙伴分配器分配页面时使用的 GFP 标志存储在这里
 
-	size_t				colour;		/* cache colouring range */
-	unsigned int		colour_off;	/* colour offset */
-	unsigned int		colour_next;	/* cache colouring */
+	size_t				colour;		/* cache colouring range */ // 如果可能，每个slab 将对象存储在不同的缓存行中
+	unsigned int		colour_off;	/* colour offset */ // 保持slab字节对齐
+	unsigned int		colour_next;	/* cache colouring */ // 下一个要使用的缓存行（被染色的）
 	kmem_cache_t		*slabp_cache;
-	unsigned int		growing;
-	unsigned int		dflags;		/* dynamic flags */
+	unsigned int		growing;   // // 此标志设置为指示缓存是否正在增长
+	unsigned int		dflags;		/* dynamic flags */ // 这些是在缓存生命周期内更改的动态标志
 
 	/* constructor func */
-	void (*ctor)(void *, kmem_cache_t *, unsigned long);
+	void (*ctor)(void *, kmem_cache_t *, unsigned long);   // 一个复杂的对象可以选择提供一个构造函数来初始化每个新对象
 
 	/* de-constructor func */
-	void (*dtor)(void *, kmem_cache_t *, unsigned long);
+	void (*dtor)(void *, kmem_cache_t *, unsigned long);   // 对象析构函数，可能为 NULL
 
-	unsigned long		failures;
+	unsigned long		failures;   // 除了初始化为 0 之外，该字段在代码中的任何地方都没有使用
 
 /* 3) cache creation/removal */
 	char				name[CACHE_NAMELEN];

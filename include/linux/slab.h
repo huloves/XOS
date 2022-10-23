@@ -25,4 +25,4 @@ typedef struct kmem_cache_s kmem_cache_t;
 extern void kmem_cache_init(void);
 extern void kmem_cache_sizes_init(void);
 
-#endif
+#endif /* _LINUX_SLAB_H */
