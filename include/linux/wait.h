@@ -52,6 +52,35 @@ struct __wait_queue_head {
 };
 typedef struct __wait_queue_head wait_queue_head_t;
 
+/*
+ * Macros for declaration and initialization of the datatypes
+ */
+
+#if WAITQUEUE_DEBUG
+# define __WAITQUEUE_DEBUG_INIT(name) (long)&(name).__magic, 0
+# define __WAITQUEUE_HEAD_DEBUG_INIT(name) (long)&(name).__magic, (long)&(name).__magic
+#else
+# define __WAITQUEUE_DEBUG_INIT(name)
+# define __WAITQUEUE_HEAD_DEBUG_INIT(name)
+#endif
+
+#define __WAITQUEUE_INITIALIZER(name, tsk) {				\
+	task:		tsk,						\
+	task_list:	{ NULL, NULL },					\
+			 __WAITQUEUE_DEBUG_INIT(name)}
+
+#define DECLARE_WAITQUEUE(name, tsk)					\
+	wait_queue_t name = __WAITQUEUE_INITIALIZER(name, tsk)
+
+#define __WAIT_QUEUE_HEAD_INITIALIZER(name) {				\
+	lock:		WAITQUEUE_RW_LOCK_UNLOCKED,			\
+	task_list:	{ &(name).task_list, &(name).task_list },	\
+			__WAITQUEUE_HEAD_DEBUG_INIT(name)}
+
+#define DECLARE_WAIT_QUEUE_HEAD(name) \
+	wait_queue_head_t name = __WAIT_QUEUE_HEAD_INITIALIZER(name)
+
+
 static inline void init_waitqueue_head(wait_queue_head_t *q)
 {
 	q->lock = WAITQUEUE_RW_LOCK_UNLOCKED;

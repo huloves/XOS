@@ -36,4 +36,6 @@ static inline void init_MUTEX_LOCKED (struct semaphore *sem)
 	sema_init(sem, 0);
 }
 
+void __down_failed(void);
+
 #endif /* _LINUX_SEMAPHORE_H */
