@@ -86,12 +86,15 @@ static unsigned long offslab_limit;
  * Slabs are chained into three list: fully used, partial, fully free slabs.
  */
 typedef struct slab_s {
-	struct list_head	list;
-	unsigned long		colouroff;
-	void			*s_mem;		/* including colour offset */
-	unsigned int		inuse;		/* num of objs active in slab */
-	kmem_bufctl_t		free;
+	struct list_head	list;   // 该slab所属的链表，slab_full, slab_partial or slab_free中的一个
+	unsigned long		colouroff;   // 这是从slab中第一个对象的基地址偏移的颜色。第一个对象的地址是s_mem + colouroff
+	void				*s_mem;		/* including colour offset */ // 这给出了slab中第一个对象的起始地址
+	unsigned int		inuse;		/* num of objs active in slab */ // slab中活动对象的数量
+	kmem_bufctl_t		free;   // 这是一个 bufctl 数组，用于存储空闲对象的位置
 } slab_t;
+
+#define slab_bufctl(slabp) \
+	((kmem_bufctl_t *)(((slab_t*)slabp)+1))
 
 #define CACHE_NAMELEN	20	/* max name length for a slab cache */
 
@@ -236,7 +239,7 @@ static int slab_break_gfp_order = BREAK_GFP_ORDER_LO;
 
 /* Size description struct for general caches. */
 typedef struct cache_sizes {
-	size_t		 cs_size;
+	size_t		 	cs_size;
 	kmem_cache_t	*cs_cachep;
 	kmem_cache_t	*cs_dmacachep;
 } cache_sizes_t;
