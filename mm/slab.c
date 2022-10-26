@@ -239,9 +239,9 @@ static int slab_break_gfp_order = BREAK_GFP_ORDER_LO;
 
 /* Size description struct for general caches. */
 typedef struct cache_sizes {
-	size_t		 	cs_size;
-	kmem_cache_t	*cs_cachep;
-	kmem_cache_t	*cs_dmacachep;
+	size_t		 	cs_size;   // 内存块大小
+	kmem_cache_t	*cs_cachep;   // normal内存使用的块缓存
+	kmem_cache_t	*cs_dmacachep;   // 用于DMA的块缓存
 } cache_sizes_t;
 
 static cache_sizes_t cache_sizes[] = {
@@ -311,13 +311,13 @@ void kmem_cache_init(void)
 	printk("kmem_cache_init start.\n");
 	size_t left_over;
 
-	INIT_LIST_HEAD(&cache_chain);
+	INIT_LIST_HEAD(&cache_chain);   // 初始化高速缓存链表
 	kmem_cache_estimate(0, cache_cache.objsize, 0,
-			&left_over, &cache_cache.num);
+			&left_over, &cache_cache.num);   // 计算对象的数量和消耗的字节数
 	if (!cache_cache.num)
 		BUG();
 	
 	cache_cache.colour = left_over/cache_cache.colour_off;
-	cache_cache.colour_next = 0;
+	cache_cache.colour_next = 0;   // 指示接下来使用哪一行，从0开始
 	printk("kmem_cache_init down.\n");
 }

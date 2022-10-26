@@ -1,6 +1,8 @@
 #ifndef _LINUX_SLAB_H
 #define _LINUX_SLAB_H
 
+#include <asm-i386/types.h>
+
 typedef struct kmem_cache_s kmem_cache_t;
 
 /* flags to pass to kmem_cache_create().
@@ -24,5 +26,10 @@ typedef struct kmem_cache_s kmem_cache_t;
 /* prototypes */
 extern void kmem_cache_init(void);
 extern void kmem_cache_sizes_init(void);
+
+extern kmem_cache_t *kmem_cache_create(const char *, size_t, size_t, unsigned long,
+				       void (*)(void *, kmem_cache_t *, unsigned long),
+				       void (*)(void *, kmem_cache_t *, unsigned long));
+extern void *kmem_cache_alloc(kmem_cache_t *, int);
 
 #endif /* _LINUX_SLAB_H */
