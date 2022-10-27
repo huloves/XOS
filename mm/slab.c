@@ -8,6 +8,8 @@
 #include <linux/mm.h>
 #include <linux/kernel.h>
 #include <asm-i386/stdio.h>
+#include <linux/compiler.h>
+#include <asm-i386/hardirq.h>
 
 /*
  * DEBUG	- 1 for kmem_cache_create() to honour; SLAB_DEBUG_INITIAL,
@@ -320,4 +322,349 @@ void kmem_cache_init(void)
 	cache_cache.colour = left_over/cache_cache.colour_off;
 	cache_cache.colour_next = 0;   // 指示接下来使用哪一行，从0开始
 	printk("kmem_cache_init down.\n");
+}
+
+/* Interface to system's page allocator. No need to hold the cache-lock.
+ */
+static inline void * kmem_getpages (kmem_cache_t *cachep, unsigned long flags)
+{
+	void	*addr;
+
+	/*
+	 * If we requested dmaable memory, we will get it. Even if we
+	 * did not request dmaable memory, we might get it, but that
+	 * would be relatively rare and ignorable.
+	 */
+	flags |= cachep->gfpflags;
+	addr = (void*) __get_free_pages(flags, cachep->gfporder);
+	/* Assume that now we have the pages no one else can legally
+	 * messes with the 'struct page's.
+	 * However vm_scan() might try to test the structure to see if
+	 * it is a named-page or buffer-page.  The members it tests are
+	 * of no interest here.....
+	 */
+	return addr;
+}
+
+/* Interface to system's page release. */
+static inline void kmem_freepages (kmem_cache_t *cachep, void *addr)
+{
+	unsigned long i = (1<<cachep->gfporder);
+	struct page *page = virt_to_page(addr);
+
+	/* free_pages() does not clear the type bit - we do that.
+	 * The pages have been unlinked from their cache-slab,
+	 * but their 'struct page's might be accessed in
+	 * vm_scan(). Shouldn't be a worry.
+	 */
+	while (i--) {
+		PageClearSlab(page);
+		page++;
+	}
+	free_pages((unsigned long)addr, cachep->gfporder);
+}
+
+/* Get the memory for a slab management obj. */
+static inline slab_t * kmem_cache_slabmgmt (kmem_cache_t *cachep,
+			void *objp, int colour_off, int local_flags)
+{
+	slab_t *slabp;
+	
+	if (OFF_SLAB(cachep)) {
+		/* Slab management obj is off-slab. */
+		slabp = kmem_cache_alloc(cachep->slabp_cache, local_flags);
+		if (!slabp)
+			return NULL;
+	} else {
+		/* FIXME: change to
+			slabp = objp
+		 * if you enable OPTIMIZE
+		 */
+		slabp = objp+colour_off;
+		colour_off += L1_CACHE_ALIGN(cachep->num *
+				sizeof(kmem_bufctl_t) + sizeof(slab_t));
+	}
+	slabp->inuse = 0;
+	slabp->colouroff = colour_off;
+	slabp->s_mem = objp+colour_off;
+
+	return slabp;
+}
+
+static inline void kmem_cache_init_objs (kmem_cache_t * cachep,
+			slab_t * slabp, unsigned long ctor_flags)
+{
+	int i;
+
+	for (i = 0; i < cachep->num; i++) {
+		void* objp = slabp->s_mem+cachep->objsize*i;
+#if DEBUG
+		if (cachep->flags & SLAB_RED_ZONE) {
+			*((unsigned long*)(objp)) = RED_MAGIC1;
+			*((unsigned long*)(objp + cachep->objsize -
+					BYTES_PER_WORD)) = RED_MAGIC1;
+			objp += BYTES_PER_WORD;
+		}
+#endif
+
+		/*
+		 * Constructors are not allowed to allocate memory from
+		 * the same cache which they are a constructor for.
+		 * Otherwise, deadlock. They must also be threaded.
+		 */
+		if (cachep->ctor)
+			cachep->ctor(objp, cachep, ctor_flags);
+#if DEBUG
+		if (cachep->flags & SLAB_RED_ZONE)
+			objp -= BYTES_PER_WORD;
+		if (cachep->flags & SLAB_POISON)
+			/* need to poison the objs */
+			kmem_poison_obj(cachep, objp);
+		if (cachep->flags & SLAB_RED_ZONE) {
+			if (*((unsigned long*)(objp)) != RED_MAGIC1)
+				BUG();
+			if (*((unsigned long*)(objp + cachep->objsize -
+					BYTES_PER_WORD)) != RED_MAGIC1)
+				BUG();
+		}
+#endif
+		slab_bufctl(slabp)[i] = i+1;
+	}
+	slab_bufctl(slabp)[i-1] = BUFCTL_END;
+	slabp->free = 0;
+}
+
+/*
+ * Grow (by 1) the number of slabs within a cache.  This is called by
+ * kmem_cache_alloc() when there are no active objs left in a cache.
+ */
+static int kmem_cache_grow (kmem_cache_t * cachep, int flags)
+{
+	slab_t	*slabp;
+	struct page	*page;
+	void		*objp;
+	size_t		 offset;
+	unsigned int	 i, local_flags;
+	unsigned long	 ctor_flags;
+	unsigned long	 save_flags;
+
+	/* Be lazy and only check for valid flags here,
+ 	 * keeping it out of the critical path in kmem_cache_alloc().
+	 */
+	if (flags & ~(SLAB_DMA|SLAB_LEVEL_MASK|SLAB_NO_GROW))
+		BUG();
+	if (flags & SLAB_NO_GROW)
+		return 0;
+
+	/*
+	 * The test for missing atomic flag is performed here, rather than
+	 * the more obvious place, simply to reduce the critical path length
+	 * in kmem_cache_alloc(). If a caller is seriously mis-behaving they
+	 * will eventually be caught here (where it matters).
+	 */
+	if (in_interrupt() && (flags & SLAB_LEVEL_MASK) != SLAB_ATOMIC)
+		BUG();
+
+	ctor_flags = SLAB_CTOR_CONSTRUCTOR;
+	local_flags = (flags & SLAB_LEVEL_MASK);
+	if (local_flags == SLAB_ATOMIC)
+		/*
+		 * Not allowed to sleep.  Need to tell a constructor about
+		 * this - it might need to know...
+		 */
+		ctor_flags |= SLAB_CTOR_ATOMIC;
+
+	/* About to mess with non-constant members - lock. */
+	spin_lock_irqsave(&cachep->spinlock, save_flags);
+
+	/* Get colour for the slab, and cal the next value. */
+	offset = cachep->colour_next;
+	cachep->colour_next++;
+	if (cachep->colour_next >= cachep->colour)
+		cachep->colour_next = 0;
+	offset *= cachep->colour_off;
+	cachep->dflags |= DFLGS_GROWN;
+
+	cachep->growing++;
+	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
+
+	/* A series of memory allocations for a new slab.
+	 * Neither the cache-chain semaphore, or cache-lock, are
+	 * held, but the incrementing c_growing prevents this
+	 * cache from being reaped or shrunk.
+	 * Note: The cache could be selected in for reaping in
+	 * kmem_cache_reap(), but when the final test is made the
+	 * growing value will be seen.
+	 */
+
+	/* Get mem for the objs. */
+	if (!(objp = kmem_getpages(cachep, flags)))
+		goto failed;
+
+	/* Get slab management. */
+	if (!(slabp = kmem_cache_slabmgmt(cachep, objp, offset, local_flags)))
+		goto opps1;
+
+	/* Nasty!!!!!! I hope this is OK. */
+	i = 1 << cachep->gfporder;
+	page = virt_to_page(objp);
+	do {
+		SET_PAGE_CACHE(page, cachep);
+		SET_PAGE_SLAB(page, slabp);
+		PageSetSlab(page);
+		page++;
+	} while (--i);
+
+	kmem_cache_init_objs(cachep, slabp, ctor_flags);
+
+	spin_lock_irqsave(&cachep->spinlock, save_flags);
+	cachep->growing--;
+
+	/* Make slab active. */
+	list_add_tail(&slabp->list, &cachep->slabs_free);
+	STATS_INC_GROWN(cachep);
+	cachep->failures = 0;
+
+	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
+	return 1;
+opps1:
+	kmem_freepages(cachep, objp);
+failed:
+	spin_lock_irqsave(&cachep->spinlock, save_flags);
+	cachep->growing--;
+	spin_unlock_irqrestore(&cachep->spinlock, save_flags);
+	return 0;
+}
+
+static inline void kmem_cache_alloc_head(kmem_cache_t *cachep, int flags)
+{
+	if (flags & SLAB_DMA) {
+		if (!(cachep->gfpflags & GFP_DMA))
+			BUG();
+	} else {
+		if (cachep->gfpflags & GFP_DMA)
+			BUG();
+	}
+}
+
+static inline void * kmem_cache_alloc_one_tail (kmem_cache_t *cachep,
+						slab_t *slabp)
+{
+	void *objp;
+
+	STATS_INC_ALLOCED(cachep);
+	STATS_INC_ACTIVE(cachep);
+	STATS_SET_HIGH(cachep);
+
+	/* get obj pointer */
+	slabp->inuse++;
+	objp = slabp->s_mem + slabp->free*cachep->objsize;
+	slabp->free=slab_bufctl(slabp)[slabp->free];
+
+	if (unlikely(slabp->free == BUFCTL_END)) {
+		list_del(&slabp->list);
+		list_add(&slabp->list, &cachep->slabs_full);
+	}
+#if DEBUG
+	if (cachep->flags & SLAB_POISON)
+		if (kmem_check_poison_obj(cachep, objp))
+			BUG();
+	if (cachep->flags & SLAB_RED_ZONE) {
+		/* Set alloc red-zone, and check old one. */
+		if (xchg((unsigned long *)objp, RED_MAGIC2) !=
+							 RED_MAGIC1)
+			BUG();
+		if (xchg((unsigned long *)(objp+cachep->objsize -
+			  BYTES_PER_WORD), RED_MAGIC2) != RED_MAGIC1)
+			BUG();
+		objp += BYTES_PER_WORD;
+	}
+#endif
+	return objp;
+}
+
+/*
+ * Returns a ptr to an obj in the given cache.
+ * caller must guarantee synchronization
+ * #define for the goto optimization 8-)
+ */
+#define kmem_cache_alloc_one(cachep)				\
+({								\
+	struct list_head * slabs_partial, * entry;		\
+	slab_t *slabp;						\
+								\
+	slabs_partial = &(cachep)->slabs_partial;		\
+	entry = slabs_partial->next;				\
+	if (unlikely(entry == slabs_partial)) {			\
+		struct list_head * slabs_free;			\
+		slabs_free = &(cachep)->slabs_free;		\
+		entry = slabs_free->next;			\
+		if (unlikely(entry == slabs_free))		\
+			goto alloc_new_slab;			\
+		list_del(entry);				\
+		list_add(entry, slabs_partial);			\
+	}							\
+								\
+	slabp = list_entry(entry, slab_t, list);		\
+	kmem_cache_alloc_one_tail(cachep, slabp);		\
+})
+
+static inline void * __kmem_cache_alloc (kmem_cache_t *cachep, int flags)
+{
+	unsigned long save_flags;
+	void* objp;
+
+	kmem_cache_alloc_head(cachep, flags);
+try_again:
+	local_irq_save(save_flags);
+#ifdef CONFIG_SMP
+	{
+		cpucache_t *cc = cc_data(cachep);
+
+		if (cc) {
+			if (cc->avail) {
+				STATS_INC_ALLOCHIT(cachep);
+				objp = cc_entry(cc)[--cc->avail];
+			} else {
+				STATS_INC_ALLOCMISS(cachep);
+				objp = kmem_cache_alloc_batch(cachep,cc,flags);
+				if (!objp)
+					goto alloc_new_slab_nolock;
+			}
+		} else {
+			spin_lock(&cachep->spinlock);
+			objp = kmem_cache_alloc_one(cachep);
+			spin_unlock(&cachep->spinlock);
+		}
+	}
+#else
+	objp = kmem_cache_alloc_one(cachep);
+#endif
+	local_irq_restore(save_flags);
+	return objp;
+alloc_new_slab:
+#ifdef CONFIG_SMP
+	spin_unlock(&cachep->spinlock);
+alloc_new_slab_nolock:
+#endif
+	local_irq_restore(save_flags);
+	if (kmem_cache_grow(cachep, flags))
+		/* Someone may have stolen our objs.  Doesn't matter, we'll
+		 * just come back here again.
+		 */
+		goto try_again;
+	return NULL;
+}
+
+/**
+ * kmem_cache_alloc - Allocate an object
+ * @cachep: The cache to allocate from.
+ * @flags: See kmalloc().
+ *
+ * Allocate an object from this cache.  The flags are only relevant
+ * if the cache has no available objects.
+ */
+void * kmem_cache_alloc (kmem_cache_t *cachep, int flags)
+{
+	return __kmem_cache_alloc(cachep, flags);
 }
