@@ -13,6 +13,7 @@
 extern void setup_arch(void);
 extern void init_IRQ(void);
 extern void time_init(void);
+extern void fork_init(unsigned long);
 
 void start_kernel(void)
 {
@@ -45,6 +46,9 @@ void start_kernel(void)
 	 */
 	if (num_mappedpages == 0)
 		num_mappedpages = num_physpages;
+
+    fork_init(num_mappedpages);
+    proc_caches_init();
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);

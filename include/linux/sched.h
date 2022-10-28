@@ -222,4 +222,6 @@ volatile struct timeval xtime __attribute__ ((aligned(16)));
 
 void do_timer(struct pt_regs *regs);
 
+extern void proc_caches_init(void);
+
 #endif /* _LINUX_SCHED_H */
