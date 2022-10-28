@@ -8,6 +8,7 @@
 #include <linux/bootmem.h>
 #include <linux/slab.h>
 #include <linux/kernel.h>
+#include <asm-i386/pgtable.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -32,7 +33,18 @@ void start_kernel(void)
     char *str = "world";
     snprintf(name, sizeof(name), "hello %d!", 100);
     printk("name = %s\n", name);
-    // kmem_cache_sizes_init();
+    kmem_cache_sizes_init();
+    pgtable_cache_init();
+
+    /*
+	 * For architectures that have highmem, num_mappedpages represents
+	 * the amount of memory the kernel can use.  For other architectures
+	 * it's the same as the total pages.  We need both numbers because
+	 * some subsystems need to initialize based on how much memory the
+	 * kernel can use.
+	 */
+	if (num_mappedpages == 0)
+		num_mappedpages = num_physpages;
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);

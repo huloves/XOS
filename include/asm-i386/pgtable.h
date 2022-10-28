@@ -99,6 +99,11 @@ extern unsigned long empty_zero_page[1024];
 #define pgd_index(address) ((address >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
 #define __pgd_offset(address) pgd_index(address)
 
+/*
+ * No page table caches to initialise
+ */
+#define pgtable_cache_init()	do { } while (0)
+
 #define PMD_SIZE	(1UL << PMD_SHIFT)
 // #define PMD_SIZE	0
 #define PMD_MASK	(~(PMD_SIZE-1))

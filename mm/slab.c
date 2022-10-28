@@ -325,6 +325,48 @@ void kmem_cache_init(void)
 	printk("kmem_cache_init down.\n");
 }
 
+/* Initialisation - setup remaining internal and general caches.
+ * Called after the gfp() functions have been enabled, and before smp_init().
+ */
+void kmem_cache_sizes_init(void)
+{
+	printk("kmem_cache_sizes_init start.\n");
+	cache_sizes_t *sizes = cache_sizes;
+	char name[20];
+	/*
+	 * Fragmentation resistance on low memory - only use bigger
+	 * page orders on machines with more than 32MB of memory.
+	 */
+	if (num_physpages > (32 << 20) >> PAGE_SHIFT)
+		slab_break_gfp_order = BREAK_GFP_ORDER_HI;
+	do {
+		/* For performance, all the general caches are L1 aligned.
+		 * This should be particularly beneficial on SMP boxes, as it
+		 * eliminates "false sharing".
+		 * Note for systems short on memory removing the alignment will
+		 * allow tighter packing of the smaller caches. */
+		snprintf(name, sizeof(name), "size-%Zd",sizes->cs_size);
+		if (!(sizes->cs_cachep =
+			kmem_cache_create(name, sizes->cs_size,
+					0, SLAB_HWCACHE_ALIGN, NULL, NULL))) {
+			BUG();
+		}
+
+		/* Inc off-slab bufctl limit until the ceiling is hit. */
+		if (!(OFF_SLAB(sizes->cs_cachep))) {
+			offslab_limit = sizes->cs_size-sizeof(slab_t);
+			offslab_limit /= 2;
+		}
+		snprintf(name, sizeof(name), "size-%Zd(DMA)",sizes->cs_size);
+		sizes->cs_dmacachep = kmem_cache_create(name, sizes->cs_size, 0,
+			      SLAB_CACHE_DMA|SLAB_HWCACHE_ALIGN, NULL, NULL);
+		if (!sizes->cs_dmacachep)
+			BUG();
+		sizes++;
+	} while (sizes->cs_size);
+	printk("kmem_cache_size_init down.\n");
+}
+
 /* Interface to system's page allocator. No need to hold the cache-lock.
  */
 static inline void * kmem_getpages (kmem_cache_t *cachep, unsigned long flags)
