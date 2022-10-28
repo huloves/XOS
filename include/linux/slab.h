@@ -41,9 +41,11 @@ typedef struct kmem_cache_s kmem_cache_t;
 extern void kmem_cache_init(void);
 extern void kmem_cache_sizes_init(void);
 
+extern kmem_cache_t *kmem_find_general_cachep(size_t, int gfpflags);
 extern kmem_cache_t *kmem_cache_create(const char *, size_t, size_t, unsigned long,
 				       void (*)(void *, kmem_cache_t *, unsigned long),
 				       void (*)(void *, kmem_cache_t *, unsigned long));
 extern void *kmem_cache_alloc(kmem_cache_t *, int);
+extern void kmem_cache_free(kmem_cache_t *, void *);
 
 #endif /* _LINUX_SLAB_H */
