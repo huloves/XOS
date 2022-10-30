@@ -10,6 +10,7 @@
 #include <asm-i386/ptrace.h>
 #include <linux/resource.h>
 #include <asm-i386/resource.h>
+#include <asm-i386/current.h>
 
 #define TASK_RUNNING			0   // 可以被调度
 #define TASK_INTERRUPTIBLE		1   // 可以因信号的到来而被唤醒
@@ -31,6 +32,28 @@
 void trap_init(void);
 
 extern void sched_init(void);
+
+/*
+ * Some day this will be a full-fledged user tracking system..
+ */
+struct user_struct {
+	atomic_t __count;	/* reference count */
+	atomic_t processes;	/* How many processes does this user have? */
+	atomic_t files;		/* How many open files does this user have? */
+
+	/* Hash table maintenance information */
+	struct user_struct *next, **pprev;
+	uid_t uid;
+};
+
+#define get_current_user() ({ 				\
+	struct user_struct *__user = current->user;	\
+	atomic_inc(&__user->__count);			\
+	__user; })
+
+extern struct user_struct root_user;
+
+#define INIT_USER (&root_user)
 
 struct task_struct {
 	/*
@@ -116,7 +139,7 @@ struct task_struct {
 	// gid_t	groups[NGROUPS];
 	// kernel_cap_t   cap_effective, cap_inheritable, cap_permitted;
 	int keep_capabilities:1;
-	// struct user_struct *user;
+	struct user_struct *user;
 /* limits */
 	struct rlimit rlim[RLIM_NLIMITS];
 	unsigned short used_math;
@@ -182,24 +205,25 @@ struct task_struct {
 #define PT_TRACESYSGOOD	0x00000008
 
 #define INIT_TASK(tsk)	\
-{									\
-    state:		0,						\
-    flags:		0,						\
-    sigpending:		0,						\
-    lock_depth:		-1,						\
-    counter:		DEF_COUNTER,					\
-    nice:		DEF_NICE,					\
-    policy:		SCHED_OTHER,					\
-    cpus_allowed:	-1,						\
-    run_list:		LIST_HEAD_INIT(tsk.run_list),			\
-    next_task:		&tsk,						\
-    prev_task:		&tsk,						\
-    p_opptr:		&tsk,						\
-    p_pptr:		&tsk,						\
-    thread_group:	(struct list_head)LIST_HEAD_INIT(tsk.thread_group),		\
-    keep_capabilities:	0,						\
-    comm:		"swapper",					\
-    alloc_lock:		SPIN_LOCK_UNLOCKED				\
+{																				\
+    state:				0,														\
+    flags:				0,														\
+    sigpending:			0,														\
+    lock_depth:			-1,														\
+    counter:			DEF_COUNTER,											\
+    nice:				DEF_NICE,												\
+    policy:				SCHED_OTHER,											\
+    cpus_allowed:		-1,														\
+    run_list:			LIST_HEAD_INIT(tsk.run_list),							\
+    next_task:			&tsk,													\
+    prev_task:			&tsk,													\
+    p_opptr:			&tsk,													\
+    p_pptr:				&tsk,													\
+    thread_group:		(struct list_head)LIST_HEAD_INIT(tsk.thread_group),		\
+    keep_capabilities:	0,														\
+	user:				INIT_USER,												\
+    comm:				"swapper",												\
+    alloc_lock:			SPIN_LOCK_UNLOCKED										\
 }
 
 #ifndef INIT_TASK_SIZE

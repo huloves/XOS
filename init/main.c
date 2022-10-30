@@ -9,6 +9,7 @@
 #include <linux/slab.h>
 #include <linux/kernel.h>
 #include <asm-i386/pgtable.h>
+#include <linux/fs.h>
 
 extern void setup_arch(void);
 extern void init_IRQ(void);
@@ -49,6 +50,7 @@ void start_kernel(void)
 
     fork_init(num_mappedpages);
     proc_caches_init();
+    vfs_caches_init(num_mappedpages);
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);
