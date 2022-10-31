@@ -241,6 +241,10 @@ extern union task_union init_task_union;
 #define PIDHASH_SZ (4096 >> 2)
 extern struct task_struct *pidhash[PIDHASH_SZ];
 
+/* per-UID process charging. */
+extern struct user_struct * alloc_uid(uid_t);
+extern void free_uid(struct user_struct *);
+
 extern unsigned long volatile jiffies;
 volatile struct timeval xtime __attribute__ ((aligned(16)));
 
