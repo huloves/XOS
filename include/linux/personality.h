@@ -1,5 +1,7 @@
-#ifndef __LINUX_PERSONALITY_H
-#define __LINUX_PERSONALITY_H
+#ifndef _LINUX_PERSONALITY_H
+#define _LINUX_PERSONALITY_H
+
+#include <asm-i386/ptrace.h>
 
 /* Flags for bug emulation. These occupy the top three bytes. */
 #define STICKY_TIMEOUTS		0x4000000
@@ -27,4 +29,22 @@
 #define PER_RISCOS				(0x000c)
 #define PER_SOLARIS				(0x000d | STICKY_TIMEOUTS)
 
-#endif
+/* Prototype for an lcall7 syscall handler. */
+typedef void (*lcall7_func)(int, struct pt_regs *);
+
+/* Description of an execution domain - personality range supported,
+ * lcall7 syscall handler, start up / shut down functions etc.
+ * N.B. The name and lcall7 handler must be where they are since the
+ * offset of the handler is hard coded in kernel/sys_call.S.
+ */
+struct exec_domain {
+	const char *name;
+	lcall7_func handler;
+	unsigned char pers_low, pers_high;
+	unsigned long * signal_map;
+	unsigned long * signal_invmap;
+	// struct module * module;
+	struct exec_domain *next;
+};
+
+#endif /* _LINUX_PERSONALITY_H */

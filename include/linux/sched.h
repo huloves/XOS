@@ -11,6 +11,7 @@
 #include <linux/resource.h>
 #include <asm-i386/resource.h>
 #include <asm-i386/current.h>
+#include <linux/personality.h>
 
 #define TASK_RUNNING			0   // 可以被调度
 #define TASK_INTERRUPTIBLE		1   // 可以因信号的到来而被唤醒
