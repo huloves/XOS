@@ -48,9 +48,15 @@ void start_kernel(void)
 	if (num_mappedpages == 0)
 		num_mappedpages = num_physpages;
 
-    fork_init(num_mappedpages);
+    mempages = num_physpages;
+
+    // fork_init(num_mappedpages);
+    // proc_caches_init();
+    // vfs_caches_init(num_mappedpages);
+    fork_init(mempages);
     proc_caches_init();
-    vfs_caches_init(num_mappedpages); //
+    vfs_caches_init(mempages);
+	buffer_init(mempages);
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);

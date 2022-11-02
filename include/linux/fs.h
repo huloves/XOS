@@ -5,6 +5,8 @@
 #include <asm-i386/atomic.h>
 #include <linux/wait.h>
 
+extern void buffer_init(unsigned long);
+
 /*
  * Try to keep the most commonly used fields in single cache lines (16
  * bytes) to improve performance.  This ordering should be
@@ -48,5 +50,7 @@ struct buffer_head {
 
 /* fs/dcache.c */
 extern void vfs_caches_init(unsigned long);
+
+#define NR_LIST		4
 
 #endif /* _LINUX_FS_H */
