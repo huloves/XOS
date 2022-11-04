@@ -1,6 +1,10 @@
 {
 	"files.associations": {
-		"desc.h": "c"
+		"desc.h": "c",
+		"climits": "cpp",
+		"cstdarg": "cpp",
+		"cwchar": "cpp",
+		"cstdint": "cpp"
 	},
 	"C_Cpp.errorSquiggles": "Enabled"
 }
