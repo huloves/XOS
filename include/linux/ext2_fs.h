@@ -92,4 +92,36 @@ struct ext2_inode {
 	} osd2;				/* OS dependent 2 */
 };
 
-#endif
+/*
+ * Default values for user and/or group using reserved blocks
+ */
+#define	EXT2_DEF_RESUID		0
+#define	EXT2_DEF_RESGID		0
+
+/*
+ * Structure of a directory entry
+ */
+#define EXT2_NAME_LEN 255
+
+struct ext2_dir_entry {
+	__u32	inode;			/* Inode number */
+	__u16	rec_len;		/* Directory entry length */
+	__u16	name_len;		/* Name length */
+	char	name[EXT2_NAME_LEN];	/* File name */
+};
+
+/*
+ * The new version of the directory entry.  Since EXT2 structures are
+ * stored in intel byte order, and the name_len field could never be
+ * bigger than 255 chars, it's safe to reclaim the extra byte for the
+ * file_type field.
+ */
+struct ext2_dir_entry_2 {
+	__u32	inode;			/* Inode number */
+	__u16	rec_len;		/* Directory entry length */
+	__u8	name_len;		/* Name length */
+	__u8	file_type;
+	char	name[EXT2_NAME_LEN];	/* File name */
+};
+
+#endif /* _LINUX_EXT2_FS_H */

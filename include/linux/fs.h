@@ -8,6 +8,7 @@
 #include <asm-i386/semaphore.h>
 #include <linux/dcache.h>
 #include <linux/wait.h>
+#include <linux/ext2_fs_i.h>
 
 extern void buffer_init(unsigned long);
 
@@ -100,7 +101,7 @@ struct inode {
 	__u32			i_generation;
 	union {
 		// struct minix_inode_info		minix_i;
-		// struct ext2_inode_info		ext2_i;
+		struct ext2_inode_info		ext2_i;
 		// struct hpfs_inode_info		hpfs_i;
 		// struct ntfs_inode_info		ntfs_i;
 		// struct msdos_inode_info		msdos_i;
