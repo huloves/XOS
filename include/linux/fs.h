@@ -149,6 +149,42 @@ struct inode_operations {
 	// int (*getattr) (struct dentry *, struct iattr *);
 };
 
+/* Inode state bits.. */
+#define I_DIRTY_SYNC		1 /* Not dirty enough for O_DATASYNC */
+#define I_DIRTY_DATASYNC	2 /* Data-related inode changes pending */
+#define I_DIRTY_PAGES		4 /* Data-related inode changes pending */
+#define I_LOCK				8
+#define I_FREEING			16
+#define I_CLEAR				32
+
+#define I_DIRTY (I_DIRTY_SYNC | I_DIRTY_DATASYNC | I_DIRTY_PAGES)
+
+struct fown_struct {
+	int pid;		/* pid or -pgrp where SIGIO should be sent */
+	uid_t uid, euid;	/* uid/euid of process setting the owner */
+	int signum;		/* posix.1b rt signal to be delivered on IO */
+};
+
+struct file {
+	struct list_head		f_list;
+	struct dentry			*f_dentry;
+	// struct vfsmount         *f_vfsmnt;
+	struct file_operations	*f_op;
+	atomic_t				f_count;
+	unsigned int 			f_flags;
+	mode_t					f_mode;
+	loff_t					f_pos;
+	unsigned long 			f_reada, f_ramax, f_raend, f_ralen, f_rawin;
+	struct fown_struct		f_owner;
+	unsigned int			f_uid, f_gid;
+	int						f_error;
+
+	unsigned long			f_version;
+
+	/* needed for tty driver, and maybe others */
+	void				*private_data;
+};
+
 /* fs/dcache.c */
 extern void vfs_caches_init(unsigned long);
 
