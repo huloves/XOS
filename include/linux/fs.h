@@ -9,6 +9,7 @@
 #include <linux/dcache.h>
 #include <linux/wait.h>
 #include <linux/ext2_fs_i.h>
+#include <linux/ext2_fs_sb.h>
 
 extern void buffer_init(unsigned long);
 
@@ -129,26 +130,6 @@ struct inode {
 	} u;
 };
 
-struct inode_operations {
-	int (*create) (struct inode *,struct dentry *,int);
-	struct dentry * (*lookup) (struct inode *,struct dentry *);
-	int (*link) (struct dentry *,struct inode *,struct dentry *);
-	int (*unlink) (struct inode *,struct dentry *);
-	int (*symlink) (struct inode *,struct dentry *,const char *);
-	int (*mkdir) (struct inode *,struct dentry *,int);
-	int (*rmdir) (struct inode *,struct dentry *);
-	int (*mknod) (struct inode *,struct dentry *,int,int);
-	int (*rename) (struct inode *, struct dentry *,
-			struct inode *, struct dentry *);
-	int (*readlink) (struct dentry *, char *,int);
-	// int (*follow_link) (struct dentry *, struct nameidata *);
-	void (*truncate) (struct inode *);
-	int (*permission) (struct inode *, int);
-	int (*revalidate) (struct dentry *);
-	// int (*setattr) (struct dentry *, struct iattr *);
-	// int (*getattr) (struct dentry *, struct iattr *);
-};
-
 /* Inode state bits.. */
 #define I_DIRTY_SYNC		1 /* Not dirty enough for O_DATASYNC */
 #define I_DIRTY_DATASYNC	2 /* Data-related inode changes pending */
@@ -182,7 +163,130 @@ struct file {
 	unsigned long			f_version;
 
 	/* needed for tty driver, and maybe others */
-	void				*private_data;
+	void					*private_data;
+};
+
+struct super_block {
+	struct list_head	s_list;		/* Keep this first */
+	// kdev_t			s_dev;
+	unsigned long		s_blocksize;
+	unsigned char		s_blocksize_bits;
+	unsigned char		s_lock;
+	unsigned char		s_dirt;
+	// struct file_system_type	*s_type;
+	struct super_operations	*s_op;
+	// struct dquot_operations	*dq_op;
+	unsigned long		s_flags;
+	unsigned long		s_magic;
+	struct dentry		*s_root;
+	wait_queue_head_t	s_wait;
+
+	struct list_head	s_dirty;	/* dirty inodes */
+	struct list_head	s_files;
+
+	// struct block_device	*s_bdev;
+	struct list_head	s_mounts;	/* vfsmount(s) of this one */
+	// struct quota_mount_options s_dquot;	/* Diskquota specific options */
+
+	union {
+		// struct minix_sb_info	minix_sb;
+		struct ext2_sb_info	ext2_sb;
+		// struct hpfs_sb_info	hpfs_sb;
+		// struct ntfs_sb_info	ntfs_sb;
+		// struct msdos_sb_info	msdos_sb;
+		// struct isofs_sb_info	isofs_sb;
+		// struct nfs_sb_info	nfs_sb;
+		// struct sysv_sb_info	sysv_sb;
+		// struct affs_sb_info	affs_sb;
+		// struct ufs_sb_info	ufs_sb;
+		// struct efs_sb_info	efs_sb;
+		// struct shmem_sb_info	shmem_sb;
+		// struct romfs_sb_info	romfs_sb;
+		// struct smb_sb_info	smbfs_sb;
+		// struct hfs_sb_info	hfs_sb;
+		// struct adfs_sb_info	adfs_sb;
+		// struct qnx4_sb_info	qnx4_sb;
+		// struct bfs_sb_info	bfs_sb;
+		// struct udf_sb_info	udf_sb;
+		// struct ncp_sb_info	ncpfs_sb;
+		// struct usbdev_sb_info   usbdevfs_sb;
+		void			*generic_sbp;
+	} u;
+	/*
+	 * The next field is for VFS *only*. No filesystems have any business
+	 * even looking at it. You had been warned.
+	 */
+	struct semaphore s_vfs_rename_sem;	/* Kludge */
+
+	/* The next field is used by knfsd when converting a (inode number based)
+	 * file handle into a dentry. As it builds a path in the dcache tree from
+	 * the bottom up, there may for a time be a subpath of dentrys which is not
+	 * connected to the main tree.  This semaphore ensure that there is only ever
+	 * one such free path per filesystem.  Note that unconnected files (or other
+	 * non-directories) are allowed, but not unconnected diretories.
+	 */
+	struct semaphore s_nfsd_free_path_sem;
+};
+
+/*
+ * NOTE:
+ * read, write, poll, fsync, readv, writev can be called
+ *   without the big kernel lock held in all filesystems.
+ */
+struct file_operations {
+	// struct module *owner;
+	loff_t (*llseek) (struct file *, loff_t, int);
+	ssize_t (*read) (struct file *, char *, size_t, loff_t *);
+	ssize_t (*write) (struct file *, const char *, size_t, loff_t *);
+	// int (*readdir) (struct file *, void *, filldir_t);
+	// unsigned int (*poll) (struct file *, struct poll_table_struct *);
+	int (*ioctl) (struct inode *, struct file *, unsigned int, unsigned long);
+	// int (*mmap) (struct file *, struct vm_area_struct *);
+	int (*open) (struct inode *, struct file *);
+	int (*flush) (struct file *);
+	int (*release) (struct inode *, struct file *);
+	int (*fsync) (struct file *, struct dentry *, int datasync);
+	int (*fasync) (int, struct file *, int);
+	// int (*lock) (struct file *, int, struct file_lock *);
+	// ssize_t (*readv) (struct file *, const struct iovec *, unsigned long, loff_t *);
+	// ssize_t (*writev) (struct file *, const struct iovec *, unsigned long, loff_t *);
+};
+
+struct inode_operations {
+	int (*create) (struct inode *,struct dentry *,int);
+	struct dentry * (*lookup) (struct inode *,struct dentry *);
+	int (*link) (struct dentry *,struct inode *,struct dentry *);
+	int (*unlink) (struct inode *,struct dentry *);
+	int (*symlink) (struct inode *,struct dentry *,const char *);
+	int (*mkdir) (struct inode *,struct dentry *,int);
+	int (*rmdir) (struct inode *,struct dentry *);
+	int (*mknod) (struct inode *,struct dentry *,int,int);
+	int (*rename) (struct inode *, struct dentry *,
+			struct inode *, struct dentry *);
+	int (*readlink) (struct dentry *, char *,int);
+	// int (*follow_link) (struct dentry *, struct nameidata *);
+	void (*truncate) (struct inode *);
+	int (*permission) (struct inode *, int);
+	int (*revalidate) (struct dentry *);
+	// int (*setattr) (struct dentry *, struct iattr *);
+	// int (*getattr) (struct dentry *, struct iattr *);
+};
+
+/*
+ * NOTE: write_inode, delete_inode, clear_inode, put_inode can be called
+ * without the big kernel lock held in all filesystems.
+ */
+struct super_operations {
+	void (*read_inode) (struct inode *);
+	void (*write_inode) (struct inode *, int);
+	void (*put_inode) (struct inode *);
+	void (*delete_inode) (struct inode *);
+	void (*put_super) (struct super_block *);
+	void (*write_super) (struct super_block *);
+	// int (*statfs) (struct super_block *, struct statfs *);
+	int (*remount_fs) (struct super_block *, int *, char *);
+	void (*clear_inode) (struct inode *);
+	void (*umount_begin) (struct super_block *);
 };
 
 /* fs/dcache.c */
