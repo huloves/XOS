@@ -54,6 +54,16 @@ struct buffer_head {
 	struct list_head     b_inode_buffers;	/* doubly linked list of inode dirty buffers */
 };
 
+struct block_device {
+	struct list_head	bd_hash;
+	atomic_t			bd_count;
+/*	struct address_space	bd_data; */
+	dev_t				bd_dev;  /* not a kdev_t - it's a search key */
+	atomic_t			bd_openers;
+	const struct block_device_operations *bd_op;
+	struct semaphore	bd_sem;	/* open/close mutex */
+};
+
 struct inode {
 	struct list_head	i_hash;
 	struct list_head	i_list;
@@ -226,6 +236,14 @@ struct super_block {
 	 * non-directories) are allowed, but not unconnected diretories.
 	 */
 	struct semaphore s_nfsd_free_path_sem;
+};
+
+struct block_device_operations {
+	int (*open) (struct inode *, struct file *);
+	int (*release) (struct inode *, struct file *);
+	int (*ioctl) (struct inode *, struct file *, unsigned, unsigned long);
+	int (*check_media_change) (kdev_t);
+	int (*revalidate) (kdev_t);
 };
 
 /*

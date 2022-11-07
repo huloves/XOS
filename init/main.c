@@ -15,6 +15,7 @@ extern void setup_arch(void);
 extern void init_IRQ(void);
 extern void time_init(void);
 extern void fork_init(unsigned long);
+extern void bdev_init(void);
 
 void start_kernel(void)
 {
@@ -57,6 +58,7 @@ void start_kernel(void)
     proc_caches_init();
     vfs_caches_init(mempages);
 	buffer_init(mempages);
+    bdev_init();
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);
