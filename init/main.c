@@ -59,6 +59,7 @@ void start_kernel(void)
     vfs_caches_init(mempages);
 	buffer_init(mempages);
     bdev_init();
+    inode_init(mempages);
 
     struct page *page = alloc_page(__GFP_HIGH);
     printk("%s: %d: 0x%p\n", __func__, __LINE__, page);

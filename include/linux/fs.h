@@ -12,6 +12,7 @@
 #include <linux/ext2_fs_sb.h>
 
 extern void buffer_init(unsigned long);
+extern void inode_init(unsigned long);
 
 /*
  * Try to keep the most commonly used fields in single cache lines (16
