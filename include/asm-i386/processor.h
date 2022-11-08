@@ -270,7 +270,7 @@ struct thread_struct {
 } while (0)
 
 /* Free all resources held by a thread. */
-extern void release_thread(struct task_struct *);
+// extern void release_thread(struct task_struct *);
 /*
  * create a kernel thread without removing it from tasklists
  */
