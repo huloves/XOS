@@ -164,6 +164,7 @@ ENTRY(page_fault)
 
 .data
 ENTRY(sys_call_table)
+	.long SYMBOL_NAME(sys_ni_syscall)	/* 0  -  old "setup()" system call*/
 #	.long SYMBOL_NAME(sys_exit)
 #	.long SYMBOL_NAME(sys_fork)
 #	.long SYMBOL_NAME(sys_clone)
