@@ -5,6 +5,8 @@
 #include <asm-i386/hw_irq.h>
 #include <linux/linkage.h>
 
+asmlinkage int system_call(void);
+
 struct desc_struct idt_table[256] __attribute__((__section__(".data.idt"))) = { {0, 0}, };
 
 asmlinkage void page_fault(void);
@@ -167,7 +169,7 @@ void trap_init(void)
     set_trap_gate(18, common_temp18);
     set_trap_gate(19, common_temp19);
 
-	set_system_gate(SYSCALL_VECTOR, common_temp20);
+	set_system_gate(SYSCALL_VECTOR, &system_call);
 
 	/*
 	 * default LDT is a single-entry callgate to lcall7 for iBCS
