@@ -128,6 +128,58 @@ static inline void clear_in_cr4 (unsigned long mask)
 #define IO_BITMAP_OFFSET offsetof(struct tss_struct,io_bitmap)
 #define INVALID_IO_BITMAP_OFFSET 0x8000
 
+struct i387_fsave_struct {
+	long	cwd;
+	long	swd;
+	long	twd;
+	long	fip;
+	long	fcs;
+	long	foo;
+	long	fos;
+	long	st_space[20];	/* 8*10 bytes for each FP-reg = 80 bytes */
+	long	status;		/* software status information */
+};
+
+struct i387_fxsave_struct {
+	unsigned short	cwd;
+	unsigned short	swd;
+	unsigned short	twd;
+	unsigned short	fop;
+	long	fip;
+	long	fcs;
+	long	foo;
+	long	fos;
+	long	mxcsr;
+	long	reserved;
+	long	st_space[32];	/* 8*16 bytes for each FP-reg = 128 bytes */
+	long	xmm_space[32];	/* 8*16 bytes for each XMM-reg = 128 bytes */
+	long	padding[56];
+} __attribute__ ((aligned (16)));
+
+struct i387_soft_struct {
+	long	cwd;
+	long	swd;
+	long	twd;
+	long	fip;
+	long	fcs;
+	long	foo;
+	long	fos;
+	long	st_space[20];	/* 8*10 bytes for each FP-reg = 80 bytes */
+	unsigned char	ftop, changed, lookahead, no_update, rm, alimit;
+	struct info	*info;
+	unsigned long	entry_eip;
+};
+
+union i387_union {
+	struct i387_fsave_struct	fsave;
+	struct i387_fxsave_struct	fxsave;
+	struct i387_soft_struct 	soft;
+};
+
+typedef struct {
+	unsigned long seg;
+} mm_segment_t;
+
 struct tss_struct {
 	unsigned short	back_link,__blh;
 	unsigned long	esp0;
@@ -159,21 +211,70 @@ struct tss_struct {
 	unsigned long __cacheline_filler[5];
 };
 
-#define INIT_TSS  {						\
-	0,0, /* back_link, __blh */				\
-	sizeof(init_stack) + (long) &init_task, /* esp0 */	\
-	__KERNEL_DS, 0, /* ss0 */				\
-	0,0,0,0,0,0, /* stack1, stack2 */			\
-	0, /* cr3 */						\
-	0,0, /* eip,eflags */					\
-	0,0,0,0, /* eax,ecx,edx,ebx */				\
-	0,0,0,0, /* esp,ebp,esi,edi */				\
-	0,0,0,0,0,0, /* es,cs,ss */				\
-	0,0,0,0,0,0, /* ds,fs,gs */				\
-	__LDT(0),0, /* ldt */					\
-	0, INVALID_IO_BITMAP_OFFSET, /* tace, bitmap */		\
-	{~0, } /* ioperm */					\
+struct thread_struct {
+	unsigned long			esp0;
+	unsigned long			eip;
+	unsigned long			esp;
+	unsigned long			fs;
+	unsigned long			gs;
+/* Hardware debugging registers */
+	unsigned long			debugreg[8];  /* %%db0-7 debug registers */
+/* fault info */
+	unsigned long			cr2, trap_no, error_code;
+/* floating point info */
+	union i387_union		i387;
+/* virtual 86 mode info */
+	// struct vm86_struct	* vm86_info;
+	unsigned long			screen_bitmap;
+	unsigned long			v86flags, v86mask, v86mode, saved_esp0;
+/* IO permissions */
+	int						ioperm;
+	unsigned long			io_bitmap[IO_BITMAP_SIZE+1];
+};
+
+#define INIT_THREAD  {									\
+	0,													\
+	0, 0, 0, 0, 										\
+	{ [0 ... 7] = 0 },	/* debugging registers */		\
+	0, 0, 0,											\
+	{ { 0, }, },		/* 387 state */					\
+	0,0,0,0,0,											\
+	0,{~0,}			/* io permissions */				\
 }
+
+#define INIT_TSS  {										\
+	0,0, /* back_link, __blh */							\
+	sizeof(init_stack) + (long) &init_task, /* esp0 */	\
+	__KERNEL_DS, 0, /* ss0 */							\
+	0,0,0,0,0,0, /* stack1, stack2 */					\
+	0, /* cr3 */										\
+	0,0, /* eip,eflags */								\
+	0,0,0,0, /* eax,ecx,edx,ebx */						\
+	0,0,0,0, /* esp,ebp,esi,edi */						\
+	0,0,0,0,0,0, /* es,cs,ss */							\
+	0,0,0,0,0,0, /* ds,fs,gs */							\
+	__LDT(0),0, /* ldt */								\
+	0, INVALID_IO_BITMAP_OFFSET, /* tace, bitmap */		\
+	{~0, } /* ioperm */									\
+}
+
+#define start_thread(regs, new_eip, new_esp) do {		\
+	__asm__("movl %0,%%fs ; movl %0,%%gs": :"r" (0));	\
+	set_fs(USER_DS);									\
+	regs->xds = __USER_DS;								\
+	regs->xes = __USER_DS;								\
+	regs->xss = __USER_DS;								\
+	regs->xcs = __USER_CS;								\
+	regs->eip = new_eip;								\
+	regs->esp = new_esp;								\
+} while (0)
+
+/* Free all resources held by a thread. */
+extern void release_thread(struct task_struct *);
+/*
+ * create a kernel thread without removing it from tasklists
+ */
+extern int kernel_thread(int (*fn)(void *), void * arg, unsigned long flags);
 
 #define THREAD_SIZE (2*PAGE_SIZE)
 #define alloc_task_struct() ((struct task_struct *) __get_free_pages(GFP_KERNEL,1))
