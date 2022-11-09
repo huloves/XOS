@@ -4,6 +4,7 @@
 #include <asm-i386/page.h>
 #include <asm-i386/resource.h>
 #include <linux/slab.h>
+#include <asm-i386/errno.h>
 
 struct task_struct *pidhash[PIDHASH_SZ];
 
@@ -23,6 +24,30 @@ void fork_init(unsigned long mempages)
 	init_task.rlim[RLIMIT_NPROC].rlim_max = max_threads/2;
 
 	printk("fork_init down.\n");
+}
+
+/*
+ *  Ok, this is the main fork-routine. It copies the system process
+ * information (task[nr]) and sets up the necessary registers. It also
+ * copies the data segment in its entirety.  The "stack_start" and
+ * "stack_top" arguments are simply passed along to the platform
+ * specific copy_thread() routine.  Most platforms ignore stack_top.
+ * For an example that's using stack_top, see
+ * arch/ia64/kernel/process.c.
+ */
+int do_fork(unsigned long clone_flags, unsigned long stack_start,
+	    struct pt_regs *regs, unsigned long stack_size)
+{
+	int retval = -ENOMEM;
+	struct task_struct *p;
+
+	if (clone_flags & CLONE_PID) {
+		/* This is only allowed from the boot up thread */
+		if (current->pid)
+			return -EPERM;
+	}
+
+	// current->vfork_sem = &sem;
 }
 
 /* SLAB cache for signal_struct structures (tsk->sig) */
