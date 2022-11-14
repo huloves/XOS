@@ -55,12 +55,102 @@ struct buffer_head {
 	struct list_head     b_inode_buffers;	/* doubly linked list of inode dirty buffers */
 };
 
+typedef void (bh_end_io_t)(struct buffer_head *bh, int uptodate);
+void init_buffer(struct buffer_head *, bh_end_io_t *, void *);
+
+#define __buffer_state(bh, state)	(((bh)->b_state & (1UL << BH_##state)) != 0)
+
+#define buffer_uptodate(bh)		__buffer_state(bh,Uptodate)
+#define buffer_dirty(bh)		__buffer_state(bh,Dirty)
+#define buffer_locked(bh)		__buffer_state(bh,Lock)
+#define buffer_req(bh)			__buffer_state(bh,Req)
+#define buffer_mapped(bh)		__buffer_state(bh,Mapped)
+#define buffer_new(bh)			__buffer_state(bh,New)
+#define buffer_protected(bh)	__buffer_state(bh,Protected)
+
+#define bh_offset(bh)			((unsigned long)(bh)->b_data & ~PAGE_MASK)
+
+/*
+ * Attribute flags.  These should be or-ed together to figure out what
+ * has been changed!
+ */
+#define ATTR_MODE		1
+#define ATTR_UID		2
+#define ATTR_GID		4
+#define ATTR_SIZE		8
+#define ATTR_ATIME		16
+#define ATTR_MTIME		32
+#define ATTR_CTIME		64
+#define ATTR_ATIME_SET	128
+#define ATTR_MTIME_SET	256
+#define ATTR_FORCE		512	/* Not a change, but a change it */
+#define ATTR_ATTR_FLAG	1024
+
+/*
+ * This is the Inode Attributes structure, used for notify_change().  It
+ * uses the above definitions as flags, to know which values have changed.
+ * Also, in this manner, a Filesystem can look at only the values it cares
+ * about.  Basically, these are the attributes that the VFS layer can
+ * request to change from the FS layer.
+ *
+ * Derek Atkins <warlord@MIT.EDU> 94-10-20
+ */
+struct iattr {
+	unsigned int	ia_valid;
+	umode_t		ia_mode;
+	uid_t		ia_uid;
+	gid_t		ia_gid;
+	loff_t		ia_size;
+	time_t		ia_atime;
+	time_t		ia_mtime;
+	time_t		ia_ctime;
+	unsigned int	ia_attr_flags;
+};
+
+/*
+ * This is the inode attributes flag definitions
+ */
+#define ATTR_FLAG_SYNCRONOUS	1 	/* Syncronous write */
+#define ATTR_FLAG_NOATIME		2 	/* Don't update atime */
+#define ATTR_FLAG_APPEND		4 	/* Append-only file */
+#define ATTR_FLAG_IMMUTABLE		8 	/* Immutable file */
+#define ATTR_FLAG_NODIRATIME	16 	/* Don't update atime for directory */
+
+/*
+ * oh the beauties of C type declarations.
+ */
+struct page;
+struct address_space;
+struct file;
+
+struct address_space_operations {
+	int (*writepage)(struct page *);
+	int (*readpage)(struct file *, struct page *);
+	int (*sync_page)(struct page *);
+	int (*prepare_write)(struct file *, struct page *, unsigned, unsigned);
+	int (*commit_write)(struct file *, struct page *, unsigned, unsigned);
+	/* Unfortunately this kludge is needed for FIBMAP. Don't use it */
+	int (*bmap)(struct address_space *, long);
+};
+
+struct address_space {
+	struct list_head		clean_pages;	/* list of clean pages */
+	struct list_head		dirty_pages;	/* list of dirty pages */
+	struct list_head		locked_pages;	/* list of locked pages */
+	unsigned long			nrpages;	/* number of total pages */
+	struct address_space_operations *a_ops;	/* methods */
+	struct inode			*host;		/* owner: inode, block_device */
+	struct vm_area_struct	*i_mmap;	/* list of private mappings */
+	struct vm_area_struct	*i_mmap_shared; /* list of shared mappings */
+	spinlock_t				i_shared_lock;  /* and spinlock protecting it */
+};
+
 struct block_device {
 	struct list_head	bd_hash;
-	atomic_t			bd_count;
+	atomic_t		bd_count;
 /*	struct address_space	bd_data; */
-	dev_t				bd_dev;  /* not a kdev_t - it's a search key */
-	atomic_t			bd_openers;
+	dev_t			bd_dev;  /* not a kdev_t - it's a search key */
+	atomic_t		bd_openers;
 	const struct block_device_operations *bd_op;
 	struct semaphore	bd_sem;	/* open/close mutex */
 };

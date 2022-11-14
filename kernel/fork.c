@@ -50,12 +50,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	// current->vfork_sem = &sem;
 	p = alloc_task_struct();
 	if (!p)
-		goto fork_out;
+		// goto fork_out;
 
 	*p = *current;
 
 	retval = -EAGAIN;
-fork_out:
+// fork_out:
 }
 
 /* SLAB cache for signal_struct structures (tsk->sig) */
