@@ -48,6 +48,16 @@
 
 void trap_init(void);
 
+/*
+ * This serializes "schedule()" and also protects
+ * the run-queue from deletions/modifications (but
+ * _adding_ to the beginning of the run-queue has
+ * a separate lock).
+ */
+extern rwlock_t tasklist_lock;
+extern spinlock_t runqueue_lock;
+extern spinlock_t mmlist_lock;
+
 extern void sched_init(void);
 
 /*
@@ -206,9 +216,7 @@ struct task_struct {
 #define PF_DUMPCORE		0x00000200	/* dumped core */
 #define PF_SIGNALED		0x00000400	/* killed by a signal */
 #define PF_MEMALLOC		0x00000800	/* Allocating memory */
-#define PF_MEMDIE		0x00001000	/* Killed for out-of-memory */
-#define PF_FREE_PAGES	0x00002000	/* per process page freeing */
-#define PF_NOIO			0x00004000	/* avoid generating further I/O */
+#define PF_VFORK		0x00001000	/* Wake up parent in mm_release */
 
 #define PF_USEDFPU		0x00100000	/* task used FPU this quantum (SMP) */
 
@@ -270,5 +278,8 @@ void do_timer(struct pt_regs *regs);
 extern void proc_caches_init(void);
 
 extern int do_fork(unsigned long, unsigned long, struct pt_regs *, unsigned long);
+
+#define for_each_task(p) \
+	for (p = &init_task ; (p = p->next_task) != &init_task ; )
 
 #endif /* _LINUX_SCHED_H */

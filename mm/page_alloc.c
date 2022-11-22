@@ -60,8 +60,8 @@ static void __free_pages_ok(struct page *page, unsigned int order)
 		BUG();
 	page->flags &= ~((1<<PG_referenced) | (1<<PG_dirty));
 
-	if (current->flags & PF_FREE_PAGES)
-		goto local_freelist;
+	// if (current->flags & PF_FREE_PAGES)
+		// goto local_freelist;
 back_local_freelist:
 
 	zone = page_zone(page);
