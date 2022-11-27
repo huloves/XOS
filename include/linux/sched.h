@@ -33,6 +33,9 @@
 
 #define CLONE_SIGNAL	(CLONE_SIGHAND | CLONE_THREAD)
 
+extern int nr_running, nr_threads;
+extern int last_pid;
+
 #define TASK_RUNNING			0   // 可以被调度
 #define TASK_INTERRUPTIBLE		1   // 可以因信号的到来而被唤醒
 #define TASK_UNINTERRUPTIBLE	2   // 深度睡眠，不受信号的打扰
@@ -49,6 +52,12 @@
 #define SCHED_OTHER		0
 #define SCHED_FIFO		1
 #define SCHED_RR		2
+
+/*
+ * This is an additional bit set when we want to
+ * yield the CPU for one re-schedule..
+ */
+#define SCHED_YIELD		0x10
 
 void trap_init(void);
 
@@ -148,7 +157,7 @@ struct task_struct {
 	unsigned long sleep_time;
 
 	struct task_struct *next_task, *prev_task;
-	// struct mm_struct *active_mm;
+	struct mm_struct *active_mm;
 
 /* task state */
 	// struct linux_binfmt *binfmt;
@@ -296,6 +305,18 @@ extern union task_union init_task_union;
 #define PIDHASH_SZ (4096 >> 2)
 extern struct task_struct *pidhash[PIDHASH_SZ];
 
+#define pid_hashfn(x)	((((x) >> 8) ^ (x)) & (PIDHASH_SZ - 1))
+
+static inline void hash_pid(struct task_struct *p)
+{
+	struct task_struct **htable = &pidhash[pid_hashfn(p->pid)];
+
+	if((p->pidhash_next = *htable) != NULL)
+		(*htable)->pidhash_pprev = &p->pidhash_next;
+	*htable = p;
+	p->pidhash_pprev = htable;
+}
+
 /* per-UID process charging. */
 extern struct user_struct * alloc_uid(uid_t);
 extern void free_uid(struct user_struct *);
@@ -307,11 +328,28 @@ void do_timer(struct pt_regs *regs);
 
 extern void proc_caches_init(void);
 
+extern void wake_up_process(struct task_struct * p);
 extern int do_fork(unsigned long, unsigned long, struct pt_regs *, unsigned long);
+
+#define SET_LINKS(p) do { \
+	(p)->next_task = &init_task; \
+	(p)->prev_task = init_task.prev_task; \
+	init_task.prev_task->next_task = (p); \
+	init_task.prev_task = (p); \
+	(p)->p_ysptr = NULL; \
+	if (((p)->p_osptr = (p)->p_pptr->p_cptr) != NULL) \
+		(p)->p_osptr->p_ysptr = p; \
+	(p)->p_pptr->p_cptr = p; \
+	} while (0)
 
 #define for_each_task(p) \
 	for (p = &init_task ; (p = p->next_task) != &init_task ; )
 
 extern int  copy_thread(int, unsigned long, unsigned long, unsigned long, struct task_struct *, struct pt_regs *);
+
+static inline int task_on_runqueue(struct task_struct *p)
+{
+	return (p->run_list.next != NULL);
+}
 
 #endif /* _LINUX_SCHED_H */

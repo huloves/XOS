@@ -54,7 +54,7 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
 	childregs->esp = esp;
 
 	p->thread.esp = (unsigned long) childregs;
-	p->thread.esp0 = (unsigned long) (childregs+1);
+	p->thread.esp0 = (unsigned long) (childregs+1);   // 指向子进程的系统空间堆栈的顶端
 
 	p->thread.eip = (unsigned long) ret_from_fork;
 

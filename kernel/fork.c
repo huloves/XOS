@@ -194,7 +194,55 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 		goto bad_fork_cleanup_sighand;
 	// p->semundo = NULL;
 
+	/* Our parent execution domain becomes current domain
+	   These must match for thread signalling to apply */
+	
+	p->parent_exec_id = p->self_exec_id;   // parent_exec_id表示父进程的执行域，self_exec_id表示本进程的执行域
+
+	/* ok, now we should be set up.. */
+	p->swappable = 1;   // swapperable表示本进程的存储页面可以被换出
+	p->exit_signal = clone_flags & CSIGNAL;   // exit_signal为本进程执行exit()时向父进程发出的信号
+	p->pdeath_signal = 0;   // pdeath_signal为父进程在执行exit()时向本进程发出的信号
+
+	/*
+	 * "share" dynamic priority between parent and child, thus the
+	 * total amount of dynamic priorities in the system doesnt change,
+	 * more scheduling fairness. This is only important in the first
+	 * timeslice, on the long run the scheduling behaviour is unchanged.
+	 */
+	p->counter = (current->counter + 1) >> 1;   // counter字段的值就是进程的运行时间配额
+	current->counter >>= 1;
+	if (!current->counter)
+		current->need_resched = 1;
+
+	/*
+	 * Ok, add it to the run-queues and make it
+	 * visible to the rest of the system.
+	 *
+	 * Let it rip!
+	 */
+	retval = p->pid;
+	p->tgid = retval;
+	INIT_LIST_HEAD(&p->thread_group);
+	write_lock_irq(&tasklist_lock);
+	if (clone_flags & CLONE_THREAD) {   // 如果创建的是线程，则还要通过thread_group与父进程链接在一起
+		p->tgid = current->tgid;
+		list_add(&p->thread_group, &current->thread_group);
+	}
+	SET_LINKS(p);   // 将子进程的task_struct结构链入内核的进程队列
+	hash_pid(p);    // 将子进程链入按其pid计算得的杂凑队列
+	nr_threads++;
+	write_unlock_irq(&tasklist_lock);
+
+	// if (p->ptrace & PT_PTRACED)
+	// 	send_sig(SIGSTOP, p, 1);
+
+	wake_up_process(p);		/* do this last */
+	++total_forks;
+
 fork_out:
+	// if ((clone_flags & CLONE_VFORK) && (retval > 0)) 
+		// down(&sem);
 	return retval;
 
 bad_fork_cleanup_sighand:
