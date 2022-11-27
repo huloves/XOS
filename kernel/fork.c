@@ -189,7 +189,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	// 	goto bad_fork_cleanup_fs;
 	// if (copy_mm(clone_flags, p))
 	// 	goto bad_fork_cleanup_sighand;
-	// retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
+	retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
 	if (retval)
 		goto bad_fork_cleanup_sighand;
 	// p->semundo = NULL;

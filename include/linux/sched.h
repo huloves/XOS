@@ -15,6 +15,7 @@
 #include <linux/timer.h>
 #include <linux/wait.h>
 #include <asm-i386/mmu.h>
+#include <asm-i386/processor.h>
 
 /*
  * cloning flags:
@@ -208,7 +209,7 @@ struct task_struct {
 	// struct sem_undo *semundo;
 	// struct sem_queue *semsleeping;
 /* CPU-specific state of this task */
-	// struct thread_struct thread;
+	struct thread_struct thread;
 /* filesystem information */
 	// struct fs_struct *fs;
 /* open file information */
@@ -310,5 +311,7 @@ extern int do_fork(unsigned long, unsigned long, struct pt_regs *, unsigned long
 
 #define for_each_task(p) \
 	for (p = &init_task ; (p = p->next_task) != &init_task ; )
+
+extern int  copy_thread(int, unsigned long, unsigned long, unsigned long, struct task_struct *, struct pt_regs *);
 
 #endif /* _LINUX_SCHED_H */

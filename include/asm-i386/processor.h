@@ -11,7 +11,7 @@
 #include <asm-i386/types.h>
 #include <asm-i386/cache.h>
 #include <asm-i386/page.h>
-#include <linux/sched.h>
+// #include <linux/sched.h>
 #include <asm-i386/desc.h>
 #include <linux/mm.h>
 

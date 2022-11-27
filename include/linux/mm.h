@@ -4,7 +4,7 @@
 #include <linux/list.h>
 #include <asm-i386/atomic.h>
 #include <linux/mmzone.h>
-#include <linux/sched.h>
+// #include <linux/sched.h>
 #include <asm-i386/page.h>
 
 /*

@@ -32,10 +32,10 @@ extern char* strcat(char* dst_, const char* src_);
 /* 在字符串str中查找指定字符ch出现的次数 */
 extern uint32_t strchrs(const char* str, uint8_t ch);
 
-#define struct_cpy(x,y) 			\
-({						\
-	memcpy(x, y, sizeof(*(x)));		\
-})
+// #define struct_cpy(x,y) 			\
+// ({						\
+// 	memcpy(x, y, sizeof(*(x)));		\
+// })
 
 extern char* itoa(int num,char* dst,int radix);
 
