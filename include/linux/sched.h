@@ -12,6 +12,8 @@
 #include <asm-i386/resource.h>
 #include <asm-i386/current.h>
 #include <linux/personality.h>
+#include <linux/timer.h>
+#include <linux/wait.h>
 
 /*
  * cloning flags:
@@ -147,12 +149,12 @@ struct task_struct {
 	struct task_struct *pidhash_next;
 	struct task_struct **pidhash_pprev;
 
-	// wait_queue_head_t wait_chldexit;	/* for wait4() */
+	wait_queue_head_t wait_chldexit;	/* for wait4() */
 	// struct semaphore *vfork_sem;		/* for vfork() */
 	unsigned long rt_priority;
 	unsigned long it_real_value, it_prof_value, it_virt_value;
 	unsigned long it_real_incr, it_prof_incr, it_virt_incr;
-	// struct timer_list real_timer;
+	struct timer_list real_timer;
 	// struct tms times;   // 对per_cpu_utime[] and per_cpu_stime[] 的汇总
 	unsigned long start_time;
 	// long per_cpu_utime[NR_CPUS], per_cpu_stime[NR_CPUS];   // 表示进程在各个处理器上运行于用户空间和系统空间的累计时间

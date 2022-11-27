@@ -7,6 +7,7 @@
 #include <asm-i386/errno.h>
 #include <linux/threads.h>
 #include <linux/spinlock.h>
+#include <linux/wait.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -147,8 +148,65 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->state = TASK_UNINTERRUPTIBLE;
 
 	copy_flags(clone_flags, p);
+	p->pid = get_pid(clone_flags);
+
+	p->run_list.next = NULL;
+	p->run_list.prev = NULL;
+
+	if ((clone_flags & CLONE_VFORK) || !(clone_flags & CLONE_PARENT)) {
+		p->p_opptr = current;
+		if (!(p->ptrace & PT_PTRACED))
+			p->p_pptr = current;
+	}
+	p->p_cptr = NULL;
+	init_waitqueue_head(&p->wait_chldexit);
+	// p->vfork_sem = NULL;
+	spin_lock_init(&p->alloc_lock);
+
+	p->sigpending = 0;
+	// init_sigpending(&p->pending);   // 对子进程的待处理信号队列以及有关结构成分的初始化
+
+	p->it_real_value = p->it_virt_value = p->it_prof_value = 0;
+	p->it_real_incr = p->it_virt_incr = p->it_prof_incr = 0;
+	init_timer(&p->real_timer);
+	p->real_timer.data = (unsigned long) p;
+
+	p->leader = 0;		/* session leadership doesn't inherit */
+	p->tty_old_pgrp = 0;
+	// p->times.tms_utime = p->times.tms_stime = 0;
+	// p->times.tms_cutime = p->times.tms_cstime = 0;
+
+	p->lock_depth = -1;		/* -1 = no lock */
+	p->start_time = jiffies;
+
+	retval = -ENOMEM;
+	/* copy all the process information */
+	// if (copy_files(clone_flags, p))
+	// 	goto bad_fork_cleanup;
+	// if (copy_fs(clone_flags, p))
+	// 	goto bad_fork_cleanup_files;
+	// if (copy_sighand(clone_flags, p))
+	// 	goto bad_fork_cleanup_fs;
+	// if (copy_mm(clone_flags, p))
+	// 	goto bad_fork_cleanup_sighand;
+	// retval = copy_thread(0, clone_flags, stack_start, stack_size, p, regs);
+	if (retval)
+		goto bad_fork_cleanup_sighand;
+	// p->semundo = NULL;
+
 fork_out:
 	return retval;
+
+bad_fork_cleanup_sighand:
+	// exit_sighand(p);
+bad_fork_cleanup_fs:
+	// exit_fs(p); /* blocking */
+bad_fork_cleanup_files:
+	// exit_files(p); /* blocking */
+bad_fork_cleanup:
+	// put_exec_domain(p->exec_domain);
+	// if (p->binfmt && p->binfmt->module)
+		// __MOD_DEC_USE_COUNT(p->binfmt->module);
 bad_fork_cleanup_count:
 	atomic_dec(&p->user->processes);
 	free_uid(p->user);   // p->user->__count--，若减到0，则释放user

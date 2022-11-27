@@ -1,8 +1,9 @@
 #ifndef _LINUX_WAIT_H
 #define _LINUX_WAIT_H
 
-#include <linux/sched.h>
+// #include <linux/sched.h>
 #include <linux/list.h>
+#include <linux/spinlock.h>
 
 struct __wait_queue {
     unsigned int flags;

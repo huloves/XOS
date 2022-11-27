@@ -6,6 +6,7 @@
 #include <asm-i386/stdio.h>
 #include <linux/limits.h>
 #include <linux/debug.h>
+#include <asm-i386/page.h>
 
 #define DCACHE_PARANOIA 1
 /* #define DCACHE_DEBUG 1 */

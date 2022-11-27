@@ -10,6 +10,11 @@ struct timer_list {
 	void (*function)(unsigned long);   // 预定在到点时执行的bh函数
 };
 
+static inline void init_timer(struct timer_list * timer)
+{
+	timer->list.next = timer->list.prev = NULL;
+}
+
 static inline int timer_pending (const struct timer_list * timer)
 {
 	return timer->list.next != NULL;
