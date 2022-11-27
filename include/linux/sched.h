@@ -14,6 +14,7 @@
 #include <linux/personality.h>
 #include <linux/timer.h>
 #include <linux/wait.h>
+#include <asm-i386/mmu.h>
 
 /*
  * cloning flags:
@@ -61,6 +62,32 @@ extern spinlock_t runqueue_lock;
 extern spinlock_t mmlist_lock;
 
 extern void sched_init(void);
+
+struct mm_struct {
+	struct vm_area_struct * mmap;		/* list of VMAs */
+	struct vm_area_struct * mmap_avl;	/* tree of VMAs */
+	struct vm_area_struct * mmap_cache;	/* last find_vma result */
+	pgd_t * pgd;
+	atomic_t mm_users;			/* How many users with user space? */
+	atomic_t mm_count;			/* How many references to "struct mm_struct" (users count as 1) */
+	int map_count;				/* number of VMAs */
+	// struct semaphore mmap_sem;
+	spinlock_t page_table_lock;
+
+	struct list_head mmlist;		/* List of all active mm's */
+
+	unsigned long start_code, end_code, start_data, end_data;
+	unsigned long start_brk, brk, start_stack;
+	unsigned long arg_start, arg_end, env_start, env_end;
+	unsigned long rss, total_vm, locked_vm;
+	unsigned long def_flags;
+	unsigned long cpu_vm_mask;
+	unsigned long swap_cnt;	/* number of pages to swap on next pass */
+	unsigned long swap_address;
+
+	/* Architecture-specific MM context */
+	mm_context_t context;
+};
 
 /*
  * Some day this will be a full-fledged user tracking system..
