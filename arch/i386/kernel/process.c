@@ -4,6 +4,7 @@
 #include <linux/linkage.h>
 #include <asm-i386/ptrace.h>
 #include <linux/sched.h>
+#include <asm-i386/signal.h>
 
 asmlinkage void ret_from_fork(void) __asm__("ret_from_fork");
 
@@ -65,4 +66,21 @@ int copy_thread(int nr, unsigned long clone_flags, unsigned long esp,
 	// struct_cpy(&p->thread.i387, &current->thread.i387);
 
 	return 0;
+}
+
+asmlinkage int sys_fork(struct pt_regs regs)
+{
+	return do_fork(SIGCHLD, regs.esp, &regs, 0);
+}
+
+asmlinkage int sys_clone(struct pt_regs regs)
+{
+	unsigned long clone_flags;
+	unsigned long newsp;
+
+	clone_flags = regs.ebx;
+	newsp = regs.ecx;
+	if (!newsp)
+		newsp = regs.esp;
+	return do_fork(clone_flags, newsp, &regs, 0);
 }
