@@ -106,6 +106,7 @@ static inline void copy_flags(unsigned long clone_flags, struct task_struct *p)
 int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	    struct pt_regs *regs, unsigned long stack_size)
 {
+	printk("do_fork start.\n");
 	int retval = -ENOMEM;
 	struct task_struct *p;
 	// DECLARE_MUTEX_LOCKED(sem);
@@ -239,6 +240,8 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	wake_up_process(p);		/* do this last */
 	++total_forks;
+
+	printk("PPPPP\n");
 
 fork_out:
 	// if ((clone_flags & CLONE_VFORK) && (retval > 0)) 

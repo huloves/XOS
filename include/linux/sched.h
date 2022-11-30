@@ -16,6 +16,7 @@
 #include <linux/wait.h>
 #include <asm-i386/mmu.h>
 #include <asm-i386/processor.h>
+#include <linux/linkage.h>
 
 /*
  * cloning flags:
@@ -72,6 +73,7 @@ extern spinlock_t runqueue_lock;
 extern spinlock_t mmlist_lock;
 
 extern void sched_init(void);
+asmlinkage void schedule(void);
 
 struct mm_struct {
 	struct vm_area_struct * mmap;		/* list of VMAs */

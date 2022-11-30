@@ -2,6 +2,8 @@
 #include <linux/kernel_stat.h>
 #include <linux/interrupt.h>
 #include <asm-i386/stdio.h>
+#include <asm-i386/timex.h>
+#include <linux/debug.h>
 
 static LIST_HEAD(runqueue_head);
 
@@ -9,7 +11,17 @@ extern void timer_bh(void);
 
 struct kernel_stat kstat;
 
-extern void init_timervecs(void);
+/*
+ * We align per-CPU scheduling data on cacheline boundaries,
+ * to prevent cacheline ping-pong.
+ */
+static union {
+	struct schedule_data {
+		struct task_struct * curr;
+		cycles_t last_schedule;
+	} schedule_data;
+	char __pad [SMP_CACHE_BYTES];
+} aligned_data [NR_CPUS] __cacheline_aligned = { {{&init_task,0}}};
 
 static inline int goodness(struct task_struct * p, int this_cpu, struct mm_struct *this_mm)
 {
@@ -119,6 +131,40 @@ void wake_up_process(struct task_struct * p)
 out:
 	spin_unlock_irqrestore(&runqueue_lock, flags);
 }
+
+/*
+ *  'schedule()' is the scheduler function. It's a very simple and nice
+ * scheduler: it's not perfect, but certainly works for most things.
+ *
+ * The goto is "interesting".
+ *
+ *   NOTE!!  Task 0 is the 'idle' task, which gets called when no other
+ * tasks can run. It can not be killed, and it cannot sleep. The 'state'
+ * information in task[0] is never used.
+ */
+asmlinkage void schedule(void)
+{
+    struct schedule_data * sched_data;
+	struct task_struct *prev, *next, *p;
+	struct list_head *tmp;
+	int this_cpu, c;
+
+    if (!current->active_mm) BUG();
+need_resched_back:
+	prev = current;
+	this_cpu = prev->processor;
+
+	if (in_interrupt()) {}
+		// goto scheduling_in_interrupt;
+
+	// release_kernel_lock(prev, this_cpu);
+scheduling_in_interrupt:
+    printk("Scheduling in interrupt\n");
+	BUG();
+    return;
+}
+
+extern void init_timervecs(void);
 
 void sched_init(void)
 {

@@ -17,6 +17,8 @@ extern void time_init(void);
 extern void fork_init(unsigned long);
 extern void bdev_init(void);
 
+static int init(void * unused);
+
 void start_kernel(void)
 {
     unsigned long mempages;
@@ -61,9 +63,18 @@ void start_kernel(void)
     bdev_init();
     inode_init(mempages);
 
-    struct page *page = alloc_page(__GFP_HIGH);
-    printk("%s: %d: 0x%p\n", __func__, __LINE__, page);
-    printk("%s: %d: 0x%p\n", __func__, __LINE__, mem_map);
+    kernel_thread(init, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
+    printk("AAAAAAAA.\n");
+
+    // struct page *page = alloc_page(__GFP_HIGH);
+    // printk("%s: %d: 0x%p\n", __func__, __LINE__, page);
+    // printk("%s: %d: 0x%p\n", __func__, __LINE__, mem_map);
     
+    while(1);
+}
+
+static int init(void * unused)
+{
+    printk("init thread start.\n");
     while(1);
 }

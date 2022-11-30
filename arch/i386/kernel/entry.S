@@ -89,7 +89,7 @@ ENTRY(system_call)
 ENTRY(ret_from_sys_call)
     movl SYMBOL_NAME(irq_stat),%ecx		# softirq_active
     testl SYMBOL_NAME(irq_stat)+4,%ecx	# softirq_mask
-    jne   handle_softirq
+    # jne   handle_softirq
 
 ret_with_reschedule:
 	cmpl $0,need_resched(%ebx)

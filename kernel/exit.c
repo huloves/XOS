@@ -2,9 +2,11 @@
 #include <asm-i386/current.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/hardirq.h>
+#include <asm-i386/stdio.h>
 
 void do_exit(long code)
 {
+	printk("123.\n");
 // 	struct task_struct *tsk = current;
 
 // 	if (in_interrupt())
