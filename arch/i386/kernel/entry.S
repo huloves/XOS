@@ -33,7 +33,7 @@ flags			=  4
 sigpending		=  8
 addr_limit		= 12
 exec_domain		= 16
-need_resched	= 20
+need_resched	= 12
 tsk_ptrace		= 24
 processor		= 52
 

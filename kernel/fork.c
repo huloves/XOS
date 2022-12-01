@@ -8,6 +8,7 @@
 #include <linux/threads.h>
 #include <linux/spinlock.h>
 #include <linux/wait.h>
+#include <linux/stddef.h>
 
 /* The idle threads do not count.. */
 int nr_threads;
@@ -109,6 +110,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	printk("do_fork start.\n");
 	int retval = -ENOMEM;
 	struct task_struct *p;
+	printk("p->need_resched = %d\n", offsetof(struct task_struct, need_resched));
 	// DECLARE_MUTEX_LOCKED(sem);
 
 	if (clone_flags & CLONE_PID) {
