@@ -72,7 +72,7 @@
  */
 #define loadsegment(seg,value)			\
 	asm volatile("\n"			\
-		"movl %0,%%" #seg "\n"		\
+		"mov %0,%%" #seg "\n"		\
 		: :"m" (*(unsigned int *)&(value)))
 
 #define xchg(ptr,v) ((__typeof__(*(ptr)))__xchg((unsigned long)(v),(ptr),sizeof(*(ptr))))

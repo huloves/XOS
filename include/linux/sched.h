@@ -148,7 +148,7 @@ struct task_struct {
 	long counter;
 	long nice;
 	unsigned long policy;
-	// struct mm_struct *mm;
+	struct mm_struct *mm;
 	int has_cpu, processor;
 	unsigned long cpus_allowed;
 	/*
@@ -348,6 +348,14 @@ extern int do_fork(unsigned long, unsigned long, struct pt_regs *, unsigned long
 	for (p = &init_task ; (p = p->next_task) != &init_task ; )
 
 extern int  copy_thread(int, unsigned long, unsigned long, unsigned long, struct task_struct *, struct pt_regs *);
+
+static inline void del_from_runqueue(struct task_struct * p)
+{
+	nr_running--;
+	p->sleep_time = jiffies;
+	list_del(&p->run_list);
+	p->run_list.next = NULL;
+}
 
 static inline int task_on_runqueue(struct task_struct *p)
 {

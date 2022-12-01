@@ -1,12 +1,21 @@
-#include <linux/sched.h>
+// #include <linux/sched.h>
 #include <asm-i386/desc.h>
 #include <asm-i386/segment.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/hw_irq.h>
 #include <linux/linkage.h>
+#include <asm-i386/gdt.h>
 
 asmlinkage int system_call(void);
 
+struct desc_struct default_ldt[] = { { 0, 0 }, { 0, 0 }, { 0, 0 },
+		{ 0, 0 }, { 0, 0 } };
+
+/*
+ * The IDT has to be page-aligned to simplify the Pentium
+ * F0 0F bug workaround.. We have a special link segment
+ * for this.
+ */
 struct desc_struct idt_table[256] __attribute__((__section__(".data.idt"))) = { {0, 0}, };
 
 asmlinkage void page_fault(void);
@@ -134,6 +143,27 @@ void common_temp19() {
 void common_temp20() {
 	printk("system call !!!!!!!!!!!!!!!\n");
 	while(1);
+}
+
+#define _set_tssldt_desc(n,addr,limit,type) \
+__asm__ __volatile__ ("movw %w3,0(%2)\n\t" \
+	"movw %%ax,2(%2)\n\t" \
+	"rorl $16,%%eax\n\t" \
+	"movb %%al,4(%2)\n\t" \
+	"movb %4,5(%2)\n\t" \
+	"movb $0,6(%2)\n\t" \
+	"movb %%ah,7(%2)\n\t" \
+	"rorl $16,%%eax" \
+	: "=m"(*(n)) : "a" (addr), "r"(n), "ir"(limit), "i"(type))
+
+void set_tss_desc(unsigned int n, void *addr)
+{
+	_set_tssldt_desc(gdt_table+__TSS(n), (int)addr, 235, 0x89);
+}
+
+void set_ldt_desc(unsigned int n, void *addr, unsigned int size)
+{
+	_set_tssldt_desc(gdt_table+__LDT(n), (int)addr, ((size << 3)-1), 0x82);
 }
 
 void trap_init(void)

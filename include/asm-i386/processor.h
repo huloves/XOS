@@ -12,10 +12,40 @@
 #include <asm-i386/cache.h>
 #include <asm-i386/page.h>
 // #include <linux/sched.h>
-#include <asm-i386/desc.h>
+// #include <asm-i386/desc.h>
 #include <linux/mm.h>
+#include <linux/stddef.h>
+#include <linux/threads.h>
 
 extern unsigned long mmu_cr4_features;
+
+#define __FIRST_TSS_ENTRY 12
+#define __FIRST_LDT_ENTRY (__FIRST_TSS_ENTRY+1)
+
+#define __TSS(n) (((n)<<2) + __FIRST_TSS_ENTRY)
+#define __LDT(n) (((n)<<2) + __FIRST_LDT_ENTRY)
+
+#define load_TR(n) __asm__ __volatile__("ltr %%ax"::"a" (__TSS(n)<<3))
+
+#define __load_LDT(n) __asm__ __volatile__("lldt %%ax"::"a" (__LDT(n)<<3))
+
+/*
+ * load one particular LDT into the current CPU
+ */
+// extern inline void load_LDT (struct mm_struct *mm)
+// {
+// 	int cpu = 0;
+// 	void *segments = mm->context.segments;
+// 	int count = LDT_ENTRIES;
+
+// 	if (!segments) {
+// 		segments = &default_ldt[0];
+// 		count = 5;
+// 	}
+		
+// 	set_ldt_desc(cpu, segments, count);
+// 	__load_LDT(cpu);
+// }
 
 /*
  * Default implementation of macro that returns current
@@ -210,6 +240,8 @@ struct tss_struct {
 	 */
 	unsigned long __cacheline_filler[5];
 };
+
+extern struct tss_struct init_tss[NR_CPUS];
 
 struct thread_struct {
 	unsigned long			esp0;

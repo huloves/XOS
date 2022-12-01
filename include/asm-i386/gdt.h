@@ -78,6 +78,7 @@ struct gdt_desc {
     uint8_t  base_high_byte;
 };
 
+#define  gdt_table  (struct desc_struct *)0xc0000900
 
 //---------------    eflags属性    ----------------
 

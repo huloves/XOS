@@ -3,7 +3,7 @@
 
 #include <asm-i386/page.h>
 #include <asm-i386/pgtable-2level.h>
-#include <asm-i386/processor.h>
+// #include <asm-i386/processor.h>
 #include <asm-i386/cpufeature.h>
 
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))
