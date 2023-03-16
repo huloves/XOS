@@ -605,8 +605,8 @@ void setup_arch(void)
 	unsigned long max_low_pfn;
 	
 	printk("kernel in memory start: 0x%08X\n", &_start);
-    printk("kernel in memory end:   0x%08X\n", &_end - 0xc0000000);
-    printk("kernel in memory used:   %d KB\n\n", (&_end - 0xc0000000 - &_start + 1023) / 1024);
+	printk("kernel in memory end:   0x%08X\n", &_end - 0xc0000000);
+	printk("kernel in memory used:   %d KB\n\n", (&_end - 0xc0000000 - &_start + 1023) / 1024);
 
 	show_memory_map();
 	setup_memory_region();
