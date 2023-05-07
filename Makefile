@@ -49,8 +49,8 @@ umount_image:
 
 .PHONY:qemu
 qemu:
-	qemu-system-i386 -serial stdio -drive file=./hd.img,format=raw,index=0,media=disk -m 512
+	qemu-system-x86_64 -serial stdio -drive file=./hd.img,format=raw,index=0,media=disk -m 512 -device VGA
 
 .PHONY:debug
 debug:
-	qemu-system-i386 -serial stdio -S -s -drive file=./hd.img,format=raw,index=0,media=disk -m 512
+	qemu-system-x86_64 -serial stdio -S -s -drive file=./hd.img,format=raw,index=0,media=disk -m 512
