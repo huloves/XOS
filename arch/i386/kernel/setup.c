@@ -1,3 +1,4 @@
+#include <define.h>
 #include <asm-i386/page.h>
 #include <linux/multiboot.h>
 #include <linux/bootmem.h>
@@ -601,6 +602,9 @@ void show_memory_map()
 
 void setup_arch(void)
 {
+#ifdef CONFIG_X86_32
+	
+#endif
 	printk("setup_arch start.\n");
 	unsigned long max_low_pfn;
 	

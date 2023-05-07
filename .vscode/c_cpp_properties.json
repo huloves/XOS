@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "~/repositories/XOS/include/"
+                "~/repositories/XOS/include/",
+                "~/repositories/XOS/arch/i386/include"
             ],
             "defines": [
                 "NR_CPUS=1",
