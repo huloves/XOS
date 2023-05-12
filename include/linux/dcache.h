@@ -1,7 +1,7 @@
 #ifndef __LINUX_DCACHE_H
 #define __LINUX_DCACHE_H
 
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/list.h>
 #include <linux/spinlock.h>
 

@@ -1,5 +1,5 @@
 /*
- * include/asm-i386/cache.h
+ * include/asm/cache.h
  */
 #ifndef __ARCH_I386_CACHE_H
 #define __ARCH_I386_CACHE_H

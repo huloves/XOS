@@ -8,11 +8,11 @@
 #include <asm-i386/system.h>
 #include <linux/interrupt.h>
 #include <linux/cache.h>
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/spinlock.h>
 #include <asm-i386/hardirq.h>
 #include <asm-i386/types.h>
-#include <asm-i386/current.h>
+#include <asm/current.h>
 #include <linux/sched.h>
 #include <asm-i386/stdio.h>
 

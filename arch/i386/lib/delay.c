@@ -1,4 +1,4 @@
-#include <asm-i386/delay.h>
+#include <asm/delay.h>
 #include <asm-i386/processor.h>
 #include <asm-i386/msr.h>
 #include <asm-i386/param.h>

@@ -6,8 +6,8 @@
 #include <linux/bootmem.h>
 #include <linux/list.h>
 #include <linux/string.h>
-#include <asm-i386/bitops.h>
-#include <asm-i386/current.h>
+#include <asm/bitops.h>
+#include <asm/current.h>
 #include <linux/sched.h>
 
 pg_data_t *pgdat_list;

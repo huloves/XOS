@@ -3,7 +3,7 @@
 #include <linux/cache.h>
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/linkage.h>
 #include <asm-i386/ptrace.h>
 #include <linux/kernel_stat.h>

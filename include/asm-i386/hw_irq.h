@@ -1,7 +1,7 @@
 #ifndef _ASM_HW_IRQ_H
 #define _ASM_HW_IRQ_H
 
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/linkage.h>
 
 /*

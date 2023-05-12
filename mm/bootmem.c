@@ -17,7 +17,7 @@
 #include <asm-i386/stdio.h>
 #include <asm-i386/io.h>
 #include <linux/debug.h>
-#include <asm-i386/bitops.h>
+#include <asm/bitops.h>
 #include <linux/debug.h>
 #include <linux/mm.h>
 

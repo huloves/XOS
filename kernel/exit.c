@@ -1,5 +1,5 @@
 #include <linux/linkage.h>
-#include <asm-i386/current.h>
+#include <asm/current.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/hardirq.h>
 #include <asm-i386/stdio.h>

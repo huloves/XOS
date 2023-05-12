@@ -4,8 +4,8 @@
 
 #include <linux/linkage.h>
 #include <asm-i386/ptrace.h>
-#include <asm-i386/atomic.h>
-#include <asm-i386/bitops.h>
+#include <asm/atomic.h>
+#include <asm/bitops.h>
 #include <asm-i386/system.h>
 #include <linux/spinlock.h>
 #include <linux/threads.h>

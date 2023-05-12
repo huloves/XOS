@@ -1,7 +1,7 @@
 #ifndef _I386_SEMAPHORE_H
 #define _I386_SEMAPHORE_H
 
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/wait.h>
 
 struct semaphore {

@@ -1,8 +1,8 @@
 #include <asm-i386/semaphore.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <asm-i386/current.h>
-#include <asm-i386/atomic.h>
+#include <asm/current.h>
+#include <asm/atomic.h>
 
 static spinlock_t semaphore_lock = SPIN_LOCK_UNLOCKED;
 

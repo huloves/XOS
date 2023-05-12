@@ -1,7 +1,7 @@
 #ifndef __I386_MMU_CONTEXT_H
 #define __I386_MMU_CONTEXT_H
 
-#include <asm-i386/bitops.h>
+#include <asm/bitops.h>
 #include <asm-i386/desc.h>
 
 #ifdef CONFIG_SMP

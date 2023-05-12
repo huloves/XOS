@@ -2,7 +2,7 @@
 #define _LINUX_FS_H
 
 #include <linux/kdev_t.h>
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/wait.h>
 #include <linux/list.h>
 #include <asm-i386/semaphore.h>

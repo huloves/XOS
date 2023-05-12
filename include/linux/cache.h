@@ -1,7 +1,7 @@
 #ifndef __LINUX_CACHE_H
 #define __LINUX_CACHE_H
 
-#include <asm-i386/cache.h>
+#include <asm/cache.h>
 
 
 #define SMP_CACHE_BYTES L1_CACHE_BYTES

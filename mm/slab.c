@@ -2,7 +2,7 @@
 #include <asm-i386/types.h>
 #include <linux/spinlock.h>
 #include <linux/list.h>
-#include <asm-i386/cache.h>
+#include <asm/cache.h>
 #include <asm-i386/page.h>
 #include <linux/debug.h>
 #include <linux/mm.h>

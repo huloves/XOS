@@ -6,7 +6,7 @@
 #include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
-#include <asm-i386/current.h>
+#include <asm/current.h>
 #include <linux/debug.h>
 #include <asm-i386/hardirq.h>
 

@@ -2,8 +2,8 @@
 #define __LINUX_SPINLOCK_H
 
 #include <asm-i386/system.h>
-#include <asm-i386/bitops.h>
-#include <asm-i386/atomic.h>
+#include <asm/bitops.h>
+#include <asm/atomic.h>
 
 typedef struct {
     int lock;

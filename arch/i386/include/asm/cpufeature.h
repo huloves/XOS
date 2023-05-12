@@ -7,7 +7,7 @@
 #ifndef __ASM_I386_CPUFEATURE_H
 #define __ASM_I386_CPUFEATURE_H
 
-#include <asm-i386/bitops.h>
+#include <asm/bitops.h>
 
 /* Sample usage: CPU_FEATURE_P(cpu.x86_capability, FPU) */
 #define CPU_FEATURE_P(CAP, FEATURE) test_bit(CAP, X86_FEATURE_##FEATURE ##_BIT)

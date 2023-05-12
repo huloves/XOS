@@ -10,7 +10,7 @@
 #include <asm-i386/ptrace.h>
 #include <linux/resource.h>
 #include <asm-i386/resource.h>
-#include <asm-i386/current.h>
+#include <asm/current.h>
 #include <linux/personality.h>
 #include <linux/timer.h>
 #include <linux/wait.h>

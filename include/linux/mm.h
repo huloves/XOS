@@ -2,7 +2,7 @@
 #define _LINUX_MM_H
 
 #include <linux/list.h>
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/mmzone.h>
 // #include <linux/sched.h>
 #include <asm-i386/page.h>

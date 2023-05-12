@@ -6,7 +6,7 @@
 #include <asm-i386/processor.h>
 #include <linux/mmzone.h>
 #include <linux/debug.h>
-#include <asm-i386/cpufeature.h>
+#include <asm/cpufeature.h>
 #include <asm-i386/io.h>
 #include <asm-i386/dma.h>
 #include <linux/mm.h>

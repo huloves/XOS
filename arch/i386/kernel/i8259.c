@@ -2,8 +2,8 @@
 #include <asm-i386/io.h>
 #include <linux/irq.h>
 #include <asm-i386/hw_irq.h>
-#include <asm-i386/atomic.h>
-#include <asm-i386/delay.h>
+#include <asm/atomic.h>
+#include <asm/delay.h>
 #include <asm-i386/segment.h>
 #include <linux/timex.h>
 #include <asm-i386/processor.h>

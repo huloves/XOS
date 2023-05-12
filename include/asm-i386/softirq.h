@@ -1,7 +1,7 @@
 #ifndef __ASM_SOFTIRQ_H
 #define __ASM_SOFTIRQ_H
 
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <asm-i386/hardirq.h>
 #include <linux/kernel.h>
 

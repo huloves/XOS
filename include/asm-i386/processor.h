@@ -7,9 +7,9 @@
 #ifndef _ASM_I386_PROCESSOR_H
 #define _ASM_I386_PROCESSOR_H
 
-#include <asm-i386/cpufeature.h>
+#include <asm/cpufeature.h>
 #include <asm-i386/types.h>
-#include <asm-i386/cache.h>
+#include <asm/cache.h>
 #include <asm-i386/page.h>
 // #include <linux/sched.h>
 // #include <asm-i386/desc.h>

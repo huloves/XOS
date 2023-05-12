@@ -1,7 +1,7 @@
 #ifndef _LINUX_FS_STRUCT_H
 #define _LINUX_FS_STRUCT_H
 
-#include <asm-i386/atomic.h>
+#include <asm/atomic.h>
 #include <linux/spinlock.h>
 #include <linux/dcache.h>
 
