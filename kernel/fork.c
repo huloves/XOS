@@ -4,7 +4,7 @@
 #include <asm-i386/page.h>
 #include <asm-i386/resource.h>
 #include <linux/slab.h>
-#include <asm-i386/errno.h>
+#include <asm/errno.h>
 #include <linux/threads.h>
 #include <linux/spinlock.h>
 #include <linux/wait.h>

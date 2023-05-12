@@ -12,7 +12,7 @@
 #include <asm/cache.h>
 #include <asm-i386/page.h>
 // #include <linux/sched.h>
-// #include <asm-i386/desc.h>
+// #include <asm/desc.h>
 #include <linux/mm.h>
 #include <linux/stddef.h>
 #include <linux/threads.h>

@@ -8,10 +8,10 @@
 #include <linux/debug.h>
 #include <asm/cpufeature.h>
 #include <asm-i386/io.h>
-#include <asm-i386/dma.h>
+#include <asm/dma.h>
 #include <linux/mm.h>
 #include <linux/string.h>
-#include <asm-i386/e820.h>
+#include <asm/e820.h>
 
 unsigned long highstart_pfn, highend_pfn;
 static unsigned long totalram_pages;

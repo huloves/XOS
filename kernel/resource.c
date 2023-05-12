@@ -1,7 +1,7 @@
 #include <linux/ioport.h>
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>
-#include <asm-i386/error.h>
+#include <asm/error.h>
 #include <asm-i386/io.h>
 
 struct resource ioport_resource = { "PCI IO", 0x0000, IO_SPACE_LIMIT, IORESOURCE_IO };

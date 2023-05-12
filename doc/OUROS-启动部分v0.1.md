@@ -263,7 +263,7 @@ __init static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit,
 ### 2.2 创建全局描述符表
 
 ```c
-// inlclude/asm-i386/gdt.h 部分内容
+// inlclude/asm/gdt.h 部分内容
 #define SELECTOR_K_CODE	   ((1 << 3) + (TI_GDT << 2) + RPL0)
 #define SELECTOR_K_DATA	   ((2 << 3) + (TI_GDT << 2) + RPL0)
 #define SELECTOR_K_STACK   SELECTOR_K_DATA

@@ -11,7 +11,7 @@
 #include <asm-i386/system.h>
 #include <linux/irq_cpustat.h>
 #include <linux/interrupt.h>
-#include <asm-i386/error.h>
+#include <asm/error.h>
 #include <asm-i386/stdio.h>
 
 /*

@@ -2,7 +2,7 @@
 #include <asm-i386/page.h>
 #include <linux/multiboot.h>
 #include <linux/bootmem.h>
-#include <asm-i386/e820.h>
+#include <asm/e820.h>
 #include <linux/init.h>
 #include <linux/string.h>
 #include <asm-i386/stdio.h>

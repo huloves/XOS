@@ -1,4 +1,4 @@
-#include <asm-i386/desc.h>
+#include <asm/desc.h>
 
 void load_LDT (struct mm_struct *mm)
 {

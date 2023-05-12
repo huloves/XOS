@@ -1,10 +1,10 @@
 // #include <linux/sched.h>
-#include <asm-i386/desc.h>
+#include <asm/desc.h>
 #include <asm-i386/segment.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/hw_irq.h>
 #include <linux/linkage.h>
-#include <asm-i386/gdt.h>
+#include <asm/gdt.h>
 
 asmlinkage int system_call(void);
 

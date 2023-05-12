@@ -1,6 +1,6 @@
 #include <linux/init.h>
 #include <asm-i386/types.h>
-#include <asm-i386/gdt.h>
+#include <asm/gdt.h>
 #include <linux/multiboot.h>
 #include <asm-i386/page.h>
 #include <asm-i386/print.h>

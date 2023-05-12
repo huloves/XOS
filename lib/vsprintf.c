@@ -2,7 +2,7 @@
 #include <asm-i386/types.h>
 #include <linux/string.h>
 #include <linux/ctype.h>
-#include <asm-i386/div64.h>
+#include <asm/div64.h>
 #include <asm-i386/stdio.h>
 
 unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
