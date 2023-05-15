@@ -1,8 +1,8 @@
 #include <linux/linkage.h>
 #include <linux/sched.h>
 #include <linux/interrupt.h>
-#include <asm-i386/signal.h>
-#include <asm-i386/ptrace.h>
+#include <asm/signal.h>
+#include <asm/ptrace.h>
 #include <linux/irq.h>
 #include <asm-i386/stdio.h>
 

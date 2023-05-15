@@ -5,7 +5,7 @@
 #include <asm/atomic.h>
 #include <linux/wait.h>
 #include <linux/list.h>
-#include <asm-i386/semaphore.h>
+#include <asm/semaphore.h>
 #include <linux/dcache.h>
 #include <linux/wait.h>
 #include <linux/ext2_fs_i.h>

@@ -1,5 +1,5 @@
 #include <linux/linkage.h>
-#include <asm-i386/segment.h>
+#include <asm/segment.h>
 
 EBX				= 0x00
 ECX				= 0x04

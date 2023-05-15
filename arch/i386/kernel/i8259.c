@@ -4,9 +4,9 @@
 #include <asm/hw_irq.h>
 #include <asm/atomic.h>
 #include <asm/delay.h>
-#include <asm-i386/segment.h>
+#include <asm/segment.h>
 #include <linux/timex.h>
-#include <asm-i386/processor.h>
+#include <asm/processor.h>
 #include <asm-i386/stdio.h>
 #include <asm/desc.h>
 

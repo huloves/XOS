@@ -2,8 +2,8 @@
 #include <asm-i386/stdio.h>
 #include <asm/page.h>
 #include <linux/bootmem.h>
-#include <asm-i386/pgtable.h>
-#include <asm-i386/processor.h>
+#include <asm/pgtable.h>
+#include <asm/processor.h>
 #include <linux/mmzone.h>
 #include <linux/debug.h>
 #include <asm/cpufeature.h>

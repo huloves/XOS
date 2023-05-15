@@ -5,17 +5,17 @@
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>
 #include <asm-i386/uaccess.h>
-#include <asm-i386/param.h>
+#include <asm/param.h>
 #include <linux/time.h>
-#include <asm-i386/ptrace.h>
+#include <asm/ptrace.h>
 #include <linux/resource.h>
-#include <asm-i386/resource.h>
+#include <asm/resource.h>
 #include <asm/current.h>
 #include <linux/personality.h>
 #include <linux/timer.h>
 #include <linux/wait.h>
 #include <asm/mmu.h>
-#include <asm-i386/processor.h>
+#include <asm/processor.h>
 #include <linux/linkage.h>
 
 /*

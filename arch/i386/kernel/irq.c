@@ -5,9 +5,9 @@
 #include <asm-i386/types.h>
 #include <asm/atomic.h>
 #include <linux/linkage.h>
-#include <asm-i386/ptrace.h>
+#include <asm/ptrace.h>
 #include <linux/kernel_stat.h>
-#include <asm-i386/signal.h>
+#include <asm/signal.h>
 #include <asm-i386/system.h>
 #include <linux/irq_cpustat.h>
 #include <linux/interrupt.h>

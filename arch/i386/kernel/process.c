@@ -1,10 +1,10 @@
-#include <asm-i386/processor.h>
+#include <asm/processor.h>
 #include <asm-i386/unistd.h>
 #include <asm-i386/string.h>
 #include <linux/linkage.h>
-#include <asm-i386/ptrace.h>
+#include <asm/ptrace.h>
 #include <linux/sched.h>
-#include <asm-i386/signal.h>
+#include <asm/signal.h>
 #include <asm-i386/stdio.h>
 
 asmlinkage void ret_from_fork(void) __asm__("ret_from_fork");

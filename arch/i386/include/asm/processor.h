@@ -1,5 +1,5 @@
 /*
- * include/asm-i386/processor.h
+ * include/asm/processor.h
  *
  * Copyright (C) 1994 Linus Torvalds
  */

@@ -1,7 +1,7 @@
 #include <linux/time.h>
 #include <linux/timer.h>
 #include <linux/sched.h>
-#include <asm-i386/param.h>
+#include <asm/param.h>
 #include <linux/interrupt.h>
 #include <asm-i386/stdio.h>
 #include <linux/list.h>

@@ -2,8 +2,8 @@
 #define _I386_PGTABLE_H
 
 #include <asm/page.h>
-#include <asm-i386/pgtable-2level.h>
-// #include <asm-i386/processor.h>
+#include <asm/pgtable-2level.h>
+// #include <asm/processor.h>
 #include <asm/cpufeature.h>
 
 #define pages_to_mb(x) ((x) >> (20-PAGE_SHIFT))

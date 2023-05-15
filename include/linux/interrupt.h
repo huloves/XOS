@@ -3,7 +3,7 @@
 #define _LINUX_INTERRUPT_H
 
 #include <linux/linkage.h>
-#include <asm-i386/ptrace.h>
+#include <asm/ptrace.h>
 #include <asm/atomic.h>
 #include <asm/bitops.h>
 #include <asm-i386/system.h>

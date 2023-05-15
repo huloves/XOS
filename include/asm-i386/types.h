@@ -1,7 +1,7 @@
 #ifndef _I386_TYPES_H
 #define _I386_TYPES_H
 
-#include <asm-i386/posix_types.h>
+#include <asm/posix_types.h>
 
 #define NULL ((void*)0)
 #define BITS_PER_LONG 32

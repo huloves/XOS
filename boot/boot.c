@@ -3,8 +3,8 @@
 #include <asm/gdt.h>
 #include <linux/multiboot.h>
 #include <asm/page.h>
-#include <asm-i386/print.h>
-#include <asm-i386/pgtable.h>
+#include <asm/print.h>
+#include <asm/pgtable.h>
 
 // 内核栈的栈顶
 uint32_t kern_stack_top;

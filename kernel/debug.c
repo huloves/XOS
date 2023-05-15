@@ -1,4 +1,4 @@
-#include <asm-i386/print.h>
+#include <asm/print.h>
 // #include <asm-i386/interrupt.h>
 #include <asm-i386/stdio.h>
 

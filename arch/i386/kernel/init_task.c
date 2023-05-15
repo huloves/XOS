@@ -1,7 +1,7 @@
 #include <linux/sched.h>
-#include <asm-i386/processor.h>
+#include <asm/processor.h>
 #include <linux/cache.h>
-#include <asm-i386/segment.h>
+#include <asm/segment.h>
 #include <linux/threads.h>
 
 /*

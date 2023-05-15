@@ -8,7 +8,7 @@
 #include <linux/bootmem.h>
 #include <linux/slab.h>
 #include <linux/kernel.h>
-#include <asm-i386/pgtable.h>
+#include <asm/pgtable.h>
 #include <linux/fs.h>
 
 extern void setup_arch(void);

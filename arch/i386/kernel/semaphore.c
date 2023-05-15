@@ -1,4 +1,4 @@
-#include <asm-i386/semaphore.h>
+#include <asm/semaphore.h>
 #include <linux/spinlock.h>
 #include <linux/sched.h>
 #include <asm/current.h>

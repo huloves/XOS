@@ -1,7 +1,7 @@
 #ifndef _LINUX_PERSONALITY_H
 #define _LINUX_PERSONALITY_H
 
-#include <asm-i386/ptrace.h>
+#include <asm/ptrace.h>
 
 /* Flags for bug emulation. These occupy the top three bytes. */
 #define STICKY_TIMEOUTS		0x4000000

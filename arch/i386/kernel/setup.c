@@ -6,8 +6,8 @@
 #include <linux/init.h>
 #include <linux/string.h>
 #include <asm-i386/stdio.h>
-#include <asm-i386/pgtable.h>
-#include <asm-i386/processor.h>
+#include <asm/pgtable.h>
+#include <asm/processor.h>
 #include <linux/ioport.h>
 #include <asm/io.h>
 
@@ -18,7 +18,7 @@
 char ignore_irq13;
 struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
 
-unsigned long mmu_cr4_features;   // extern in include/asm-i386/processor.h
+unsigned long mmu_cr4_features;   // extern in include/asm/processor.h
 
 /* For PCI or other memory-mapped resources */
 unsigned long pci_mem_start = 0x10000000;

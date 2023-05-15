@@ -6,7 +6,7 @@
 #include <linux/debug.h>
 #include <asm-i386/smplock.h>
 #include <linux/irq_cpustat.h>
-#include <asm-i386/param.h>
+#include <asm/param.h>
 #include <asm-i386/system.h>
 #include <asm/mmu_context.h>
 
