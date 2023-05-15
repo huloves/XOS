@@ -2,7 +2,7 @@
 #define _LINUX_BOOTMEM_H
 
 #include <linux/init.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <linux/cache.h>
 #include <asm/dma.h>
 #include <linux/mmzone.h>

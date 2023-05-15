@@ -2,7 +2,7 @@
 #define __ASM_SOFTIRQ_H
 
 #include <asm/atomic.h>
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 #include <linux/kernel.h>
 
 #define cpu_bh_disable()	do { local_bh_count()++; barrier(); } while (0)

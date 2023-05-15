@@ -1,7 +1,7 @@
 #include <linux/sched.h>
 // #include <asm-i386/processor.h>
 #include <asm-i386/stdio.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <asm-i386/resource.h>
 #include <linux/slab.h>
 #include <asm/errno.h>

@@ -1,5 +1,5 @@
 #include <define.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <linux/multiboot.h>
 #include <linux/bootmem.h>
 #include <asm/e820.h>
@@ -9,7 +9,7 @@
 #include <asm-i386/pgtable.h>
 #include <asm-i386/processor.h>
 #include <linux/ioport.h>
-#include <asm-i386/io.h>
+#include <asm/io.h>
 
 /*
  * Machine setup..

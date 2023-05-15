@@ -1,5 +1,5 @@
 #include <linux/irq.h>
-#include <asm-i386/irq.h>
+#include <asm/irq.h>
 #include <linux/cache.h>
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>

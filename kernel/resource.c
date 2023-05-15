@@ -2,7 +2,7 @@
 #include <linux/spinlock.h>
 #include <asm-i386/types.h>
 #include <asm/error.h>
-#include <asm-i386/io.h>
+#include <asm/io.h>
 
 struct resource ioport_resource = { "PCI IO", 0x0000, IO_SPACE_LIMIT, IORESOURCE_IO };
 struct resource iomem_resource = { "PCI mem", 0x00000000, 0xffffffff, IORESOURCE_MEM };

@@ -1,6 +1,6 @@
 #include <asm-i386/stdio.h>
 #include <linux/string.h>
-#include <asm-i386/io.h>
+#include <asm/io.h>
 
 /*
 颜色生成方法

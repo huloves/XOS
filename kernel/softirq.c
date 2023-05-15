@@ -1,4 +1,4 @@
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 #include <linux/irq_cpustat.h>
 #include <asm-i386/softirq.h>
 #include <linux/kernel.h>
@@ -10,7 +10,7 @@
 #include <linux/cache.h>
 #include <asm/atomic.h>
 #include <linux/spinlock.h>
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 #include <asm-i386/types.h>
 #include <asm/current.h>
 #include <linux/sched.h>

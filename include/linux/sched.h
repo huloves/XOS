@@ -14,7 +14,7 @@
 #include <linux/personality.h>
 #include <linux/timer.h>
 #include <linux/wait.h>
-#include <asm-i386/mmu.h>
+#include <asm/mmu.h>
 #include <asm-i386/processor.h>
 #include <linux/linkage.h>
 

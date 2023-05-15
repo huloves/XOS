@@ -3,7 +3,7 @@
 #include <linux/slab.h>
 #include <asm-i386/stdio.h>
 #include <linux/string.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 
 /*
  * Inode lookup is no longer as critical as it used to be:

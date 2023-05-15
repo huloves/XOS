@@ -2,7 +2,7 @@
 #define __LINUX_KERNEL_H
 
 #include <linux/threads.h>
-#include <asm-i386/irq.h>
+#include <asm/irq.h>
 
 #define DK_MAX_MAJOR 16
 #define DK_MAX_DISK 16

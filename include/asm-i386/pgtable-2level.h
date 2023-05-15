@@ -1,7 +1,7 @@
 #ifndef _I386_PGTABLE_2LEVEL_H
 #define _I386_PGTABLE_2LEVEL_H
 
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <asm-i386/stdio.h>
 #include <asm-i386/system.h>
 

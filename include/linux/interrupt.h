@@ -41,7 +41,7 @@ enum {
 	ISICOM_BH
 };
 
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 #include <asm-i386/softirq.h>
 
 

@@ -2,7 +2,7 @@
 #include <asm/desc.h>
 #include <asm-i386/segment.h>
 #include <asm-i386/stdio.h>
-#include <asm-i386/hw_irq.h>
+#include <asm/hw_irq.h>
 #include <linux/linkage.h>
 #include <asm/gdt.h>
 

@@ -4,7 +4,7 @@
 #include <linux/spinlock.h>
 #include <linux/cache.h>
 #include <linux/interrupt.h>
-#include <asm-i386/irq.h>
+#include <asm/irq.h>
 
 /*
  * Please do not include this file in generic code.  There is currently

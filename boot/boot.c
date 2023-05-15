@@ -2,7 +2,7 @@
 #include <asm-i386/types.h>
 #include <asm/gdt.h>
 #include <linux/multiboot.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <asm-i386/print.h>
 #include <asm-i386/pgtable.h>
 

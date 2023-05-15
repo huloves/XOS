@@ -1,6 +1,6 @@
 #include <linux/mm.h>
 #include <linux/mmzone.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <asm-i386/stdio.h>
 #include <linux/debug.h>
 #include <linux/bootmem.h>

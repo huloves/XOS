@@ -1,13 +1,13 @@
 #include <linux/init.h>
 #include <asm-i386/stdio.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <linux/bootmem.h>
 #include <asm-i386/pgtable.h>
 #include <asm-i386/processor.h>
 #include <linux/mmzone.h>
 #include <linux/debug.h>
 #include <asm/cpufeature.h>
-#include <asm-i386/io.h>
+#include <asm/io.h>
 #include <asm/dma.h>
 #include <linux/mm.h>
 #include <linux/string.h>

@@ -1,6 +1,6 @@
 #include <asm/delay.h>
 #include <asm-i386/processor.h>
-#include <asm-i386/msr.h>
+#include <asm/msr.h>
 #include <asm-i386/param.h>
 
 int x86_udelay_tsc = 0;		/* Delay via TSC */

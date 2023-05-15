@@ -1,7 +1,7 @@
 #ifndef __irq_cpustat_h
 #define __irq_cpustat_h
 
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 
 // extern irq_cpustat_t irq_stat[];
 

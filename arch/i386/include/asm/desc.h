@@ -1,7 +1,7 @@
 #ifndef __ARCH_DESC_H
 #define __ARCH_DESC_H
 
-#include <asm-i386/ldt.h>
+#include <asm/ldt.h>
 #include <linux/sched.h>
 
 struct desc_struct {

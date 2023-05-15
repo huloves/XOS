@@ -10,7 +10,7 @@
 #include <asm/cpufeature.h>
 #include <asm-i386/types.h>
 #include <asm/cache.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 // #include <linux/sched.h>
 // #include <asm/desc.h>
 #include <linux/mm.h>

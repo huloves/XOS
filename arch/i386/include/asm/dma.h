@@ -9,7 +9,7 @@
 #define _ASM_DMA_H
 
 #include <linux/spinlock.h>	/* And spinlocks */
-#include <asm-i386/io.h>		/* need byte IO */
+#include <asm/io.h>		/* need byte IO */
 
 #ifdef HAVE_REALLY_SLOW_DMA_CONTROLLER
 #define dma_outb	outb_p

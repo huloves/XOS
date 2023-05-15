@@ -5,7 +5,7 @@
 #include <asm/atomic.h>
 #include <linux/mmzone.h>
 // #include <linux/sched.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 
 /*
  * This struct defines a memory VMM memory area. There is one of these

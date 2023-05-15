@@ -3,13 +3,13 @@
 #include <linux/spinlock.h>
 #include <linux/list.h>
 #include <asm/cache.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 #include <linux/debug.h>
 #include <linux/mm.h>
 #include <linux/kernel.h>
 #include <asm-i386/stdio.h>
 #include <linux/compiler.h>
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 #include <linux/string.h>
 
 /*

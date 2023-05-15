@@ -329,7 +329,7 @@ __init static void gdt_create(void)
 ### 3.1 页表操作相关的宏
 
 ```c
-// include/asm-i386/page.h
+// include/asm/page.h
 #ifndef _I386_PAGE_H
 #define _I386_PAGE_H
 /* PAGE_SHIFT determines the page size */

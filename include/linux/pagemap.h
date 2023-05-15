@@ -4,7 +4,7 @@
 #include <linux/mm.h>
 #include <linux/fs.h>
 #include <linux/list.h>
-#include <asm-i386/page.h>
+#include <asm/page.h>
 
 /*
  * The page cache can done in larger chunks than

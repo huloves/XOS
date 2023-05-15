@@ -8,7 +8,7 @@
 #include <linux/sched.h>
 #include <asm/current.h>
 #include <linux/debug.h>
-#include <asm-i386/hardirq.h>
+#include <asm/hardirq.h>
 
 extern spinlock_t kernel_flag;
 

@@ -8,7 +8,7 @@
 #include <linux/irq_cpustat.h>
 #include <asm-i386/param.h>
 #include <asm-i386/system.h>
-#include <asm-i386/mmu_context.h>
+#include <asm/mmu_context.h>
 
 /*
  * Scheduling quanta.

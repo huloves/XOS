@@ -1,7 +1,7 @@
 #include <linux/spinlock.h>
-#include <asm-i386/io.h>
+#include <asm/io.h>
 #include <linux/irq.h>
-#include <asm-i386/hw_irq.h>
+#include <asm/hw_irq.h>
 #include <asm/atomic.h>
 #include <asm/delay.h>
 #include <asm-i386/segment.h>
