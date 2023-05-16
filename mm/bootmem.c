@@ -14,7 +14,7 @@
 #include <linux/mmzone.h>
 #include <asm/page.h>
 #include <linux/string.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/io.h>
 #include <linux/debug.h>
 #include <asm/bitops.h>

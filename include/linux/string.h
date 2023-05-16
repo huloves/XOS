@@ -1,7 +1,7 @@
 #ifndef _LINUX_STRING_H_
 #define _LINUX_STRING_H_
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /* 将dst_起始的size个字节置为value */
 extern void* memset(void* dst_, uint8_t value, uint32_t size);

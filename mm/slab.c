@@ -1,5 +1,5 @@
 #include <linux/slab.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <linux/spinlock.h>
 #include <linux/list.h>
 #include <asm/cache.h>
@@ -7,7 +7,7 @@
 #include <linux/debug.h>
 #include <linux/mm.h>
 #include <linux/kernel.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/compiler.h>
 #include <asm/hardirq.h>
 #include <linux/string.h>

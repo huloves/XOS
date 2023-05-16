@@ -1,7 +1,7 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /*
  * Simple doubly linked list implementation.

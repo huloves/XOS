@@ -1,7 +1,7 @@
 #ifndef _LINUX_EXT2_FS_I
 #define _LINUX_EXT2_FS_I
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /*
  * second extended file system inode data in memory

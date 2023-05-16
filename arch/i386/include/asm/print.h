@@ -1,6 +1,6 @@
 #ifndef __LIB_KERNEL_PRINT_H
 #define __LIB_KERNEL_PRINT_H
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <asm/io.h>
 /*
 颜色生成方法

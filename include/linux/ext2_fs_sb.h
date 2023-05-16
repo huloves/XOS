@@ -1,7 +1,7 @@
 #ifndef _LINUX_EXT2_FS_SB
 #define _LINUX_EXT2_FS_SB
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /*
  * The following is not needed anymore since the descriptors buffer

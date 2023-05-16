@@ -1,7 +1,7 @@
 // #include <linux/sched.h>
 #include <asm/desc.h>
 #include <asm/segment.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/hw_irq.h>
 #include <linux/linkage.h>
 #include <asm/gdt.h>

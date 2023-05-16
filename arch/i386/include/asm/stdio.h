@@ -1,7 +1,7 @@
 #ifndef __LIB_STDIO_H
 #define __LIB_STDIO_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 typedef char* va_list;
 

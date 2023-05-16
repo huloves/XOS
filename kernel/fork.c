@@ -1,6 +1,6 @@
 #include <linux/sched.h>
 // #include <asm/processor.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/page.h>
 #include <asm/resource.h>
 #include <linux/slab.h>

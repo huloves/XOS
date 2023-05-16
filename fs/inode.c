@@ -1,7 +1,7 @@
 #include <linux/fs.h>
 #include <linux/list.h>
 #include <linux/slab.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/string.h>
 #include <asm/page.h>
 

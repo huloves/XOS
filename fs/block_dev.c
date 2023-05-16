@@ -2,7 +2,7 @@
 #include <linux/list.h>
 #include <linux/spinlock.h>
 #include <linux/slab.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/string.h>
 
 #define HASH_BITS 6

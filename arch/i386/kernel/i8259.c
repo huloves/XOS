@@ -7,7 +7,7 @@
 #include <asm/segment.h>
 #include <linux/timex.h>
 #include <asm/processor.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/desc.h>
 
 BUILD_COMMON_IRQ()

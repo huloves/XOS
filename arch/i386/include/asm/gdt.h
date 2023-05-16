@@ -4,7 +4,7 @@
 
 #ifndef I386_GDT_H
 #define I386_GDT_H
-#include <asm-i386/types.h>
+#include <asm/types.h>
 // ----------------  GDT描述符属性  ----------------
 
 #define	DESC_G_4K    1

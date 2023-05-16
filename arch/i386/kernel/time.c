@@ -4,7 +4,7 @@
 #include <asm/signal.h>
 #include <asm/ptrace.h>
 #include <linux/irq.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 
 extern rwlock_t xtime_lock;
 

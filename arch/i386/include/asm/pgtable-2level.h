@@ -2,8 +2,8 @@
 #define _I386_PGTABLE_2LEVEL_H
 
 #include <asm/page.h>
-#include <asm-i386/stdio.h>
-#include <asm-i386/system.h>
+#include <asm/stdio.h>
+#include <asm/system.h>
 
 /*
  * traditional i386 two-level paging structure:

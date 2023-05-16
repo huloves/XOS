@@ -2,7 +2,7 @@
 #include <linux/spinlock.h>
 #include <linux/list.h>
 #include <linux/pagemap.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 
 #define NR_SIZES 7
 static char buffersize_index[65] =

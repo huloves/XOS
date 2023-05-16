@@ -1,7 +1,7 @@
 #ifndef __TIME_H
 #define __TIME_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 // 适合习惯的时间格式
 struct timespec {

@@ -2,17 +2,17 @@
 #include <asm/irq.h>
 #include <linux/cache.h>
 #include <linux/spinlock.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <asm/atomic.h>
 #include <linux/linkage.h>
 #include <asm/ptrace.h>
 #include <linux/kernel_stat.h>
 #include <asm/signal.h>
-#include <asm-i386/system.h>
+#include <asm/system.h>
 #include <linux/irq_cpustat.h>
 #include <linux/interrupt.h>
 #include <asm/error.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 
 /*
  * Linux has a controller-independent x86 interrupt architecture.

@@ -1,7 +1,7 @@
 #ifndef __LINUX_SPINLOCK_H
 #define __LINUX_SPINLOCK_H
 
-#include <asm-i386/system.h>
+#include <asm/system.h>
 #include <asm/bitops.h>
 #include <asm/atomic.h>
 

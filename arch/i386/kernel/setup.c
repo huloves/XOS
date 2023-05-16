@@ -5,7 +5,7 @@
 #include <asm/e820.h>
 #include <linux/init.h>
 #include <linux/string.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/pgtable.h>
 #include <asm/processor.h>
 #include <linux/ioport.h>

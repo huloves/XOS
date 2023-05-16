@@ -1,4 +1,4 @@
-#include <asm-i386/smplock.h>
+#include <asm/smplock.h>
 #include <linux/spinlock.h>
 #include <linux/debug.h>
 

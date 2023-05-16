@@ -1,7 +1,7 @@
 #ifndef _LINUX_SLAB_H
 #define _LINUX_SLAB_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <linux/mm.h>
 
 typedef struct kmem_cache_s kmem_cache_t;

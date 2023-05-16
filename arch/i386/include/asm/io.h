@@ -1,7 +1,7 @@
 #ifndef _ASM_IO_H
 #define _ASM_IO_H
 #include <asm/page.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <linux/ioport.h>
 static inline void * phys_to_virt(unsigned long address)
 {

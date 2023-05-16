@@ -1,7 +1,7 @@
 #ifndef _UAPI_SCREEN_INFO_H
 #define _UAPI_SCREEN_INFO_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /*
  * These are set up by the setup-routine at boot-time:

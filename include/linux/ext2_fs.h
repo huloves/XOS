@@ -1,7 +1,7 @@
 #ifndef _LINUX_EXT2_FS_H
 #define _LINUX_EXT2_FS_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /*
  * Constants relative to the data blocks

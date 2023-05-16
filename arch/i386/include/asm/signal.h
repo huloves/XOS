@@ -1,7 +1,7 @@
 #ifndef _ASMi386_SIGNAL_H
 #define _ASMi386_SIGNAL_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /* Avoid too many header ordering problems.  */
 struct siginfo;

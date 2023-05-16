@@ -3,7 +3,7 @@
 #include <linux/fs.h>
 #include <linux/string.h>
 #include <linux/wait.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/limits.h>
 #include <linux/debug.h>
 #include <asm/page.h>

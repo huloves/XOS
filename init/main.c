@@ -1,8 +1,8 @@
-#include <asm-i386/types.h>
-#include <asm-i386/stdio.h>
+#include <asm/types.h>
+#include <asm/stdio.h>
 #include <linux/init.h>
 #include <linux/sched.h>
-#include <asm-i386/system.h>
+#include <asm/system.h>
 #include <linux/interrupt.h>
 #include <linux/mm.h>
 #include <linux/bootmem.h>

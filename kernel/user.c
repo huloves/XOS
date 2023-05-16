@@ -1,7 +1,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 
 /*
  * UID task count cache, to get fast user lookup in "alloc_uid"

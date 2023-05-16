@@ -1,20 +1,20 @@
 #include <asm/hardirq.h>
 #include <linux/irq_cpustat.h>
-#include <asm-i386/softirq.h>
+#include <asm/softirq.h>
 #include <linux/kernel.h>
 #include <linux/threads.h>
 #include <linux/linkage.h>
-#include <asm-i386/types.h>
-#include <asm-i386/system.h>
+#include <asm/types.h>
+#include <asm/system.h>
 #include <linux/interrupt.h>
 #include <linux/cache.h>
 #include <asm/atomic.h>
 #include <linux/spinlock.h>
 #include <asm/hardirq.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <asm/current.h>
 #include <linux/sched.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 
 irq_cpustat_t irq_stat[NR_CPUS];
 

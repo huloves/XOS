@@ -3,8 +3,8 @@
 
 #include <linux/list.h>
 #include <linux/spinlock.h>
-#include <asm-i386/types.h>
-#include <asm-i386/uaccess.h>
+#include <asm/types.h>
+#include <asm/uaccess.h>
 #include <asm/param.h>
 #include <linux/time.h>
 #include <asm/ptrace.h>

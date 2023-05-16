@@ -3,9 +3,9 @@
 #include <linux/sched.h>
 #include <asm/param.h>
 #include <linux/interrupt.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/list.h>
-#include <asm-i386/system.h>
+#include <asm/system.h>
 
 /*
  * Timekeeping variables

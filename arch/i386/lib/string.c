@@ -1,4 +1,4 @@
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <linux/debug.h>
 
 void memset(void* dst_, uint8_t value, uint32_t size) {

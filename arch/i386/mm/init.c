@@ -1,5 +1,5 @@
 #include <linux/init.h>
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <asm/page.h>
 #include <linux/bootmem.h>
 #include <asm/pgtable.h>

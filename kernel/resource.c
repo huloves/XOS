@@ -1,6 +1,6 @@
 #include <linux/ioport.h>
 #include <linux/spinlock.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <asm/error.h>
 #include <asm/io.h>
 

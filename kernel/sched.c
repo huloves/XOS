@@ -1,13 +1,13 @@
 #include <linux/sched.h>
 #include <linux/kernel_stat.h>
 #include <linux/interrupt.h>
-#include <asm-i386/stdio.h>
-#include <asm-i386/timex.h>
+#include <asm/stdio.h>
+#include <asm/timex.h>
 #include <linux/debug.h>
-#include <asm-i386/smplock.h>
+#include <asm/smplock.h>
 #include <linux/irq_cpustat.h>
 #include <asm/param.h>
-#include <asm-i386/system.h>
+#include <asm/system.h>
 #include <asm/mmu_context.h>
 
 /*

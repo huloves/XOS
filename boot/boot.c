@@ -1,5 +1,5 @@
 #include <linux/init.h>
-#include <asm-i386/types.h>
+#include <asm/types.h>
 #include <asm/gdt.h>
 #include <linux/multiboot.h>
 #include <asm/page.h>

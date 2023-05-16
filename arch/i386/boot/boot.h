@@ -1,7 +1,7 @@
 #ifndef _I386_BOOT_BOOT_H
 #define _I386_BOOT_BOOT_H
 
-#include <asm-i386/types.h>
+#include <asm/types.h>
 
 /* Basic port I/O */
 static inline void outb(u8 v, u16 port)

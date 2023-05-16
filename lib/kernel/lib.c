@@ -1,4 +1,4 @@
-#include <asm-i386/stdio.h>
+#include <asm/stdio.h>
 #include <linux/string.h>
 #include <asm/io.h>
 

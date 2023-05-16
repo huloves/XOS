@@ -18,7 +18,7 @@
 #ifndef INCLUDE_MULTIBOOT_H_
 #define INCLUDE_MULTIBOOT_H_
 
-#include <asm-i386//types.h>
+#include <asm/types.h>
 /**
  * 参考 Multiboot 规范中的 Machine state
  * 启动后，在32位内核进入点，机器状态如下：

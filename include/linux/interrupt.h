@@ -6,7 +6,7 @@
 #include <asm/ptrace.h>
 #include <asm/atomic.h>
 #include <asm/bitops.h>
-#include <asm-i386/system.h>
+#include <asm/system.h>
 #include <linux/spinlock.h>
 #include <linux/threads.h>
 #include <linux/cache.h>
@@ -42,7 +42,7 @@ enum {
 };
 
 #include <asm/hardirq.h>
-#include <asm-i386/softirq.h>
+#include <asm/softirq.h>
 
 
 
