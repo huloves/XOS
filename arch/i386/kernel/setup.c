@@ -10,6 +10,8 @@
 #include <asm/processor.h>
 #include <linux/ioport.h>
 #include <asm/io.h>
+#include <asm/setup.h>
+#include <define.h>
 
 /*
  * Machine setup..
@@ -602,9 +604,6 @@ void show_memory_map()
 
 void setup_arch(void)
 {
-#ifdef CONFIG_X86_32
-	
-#endif
 	printk("setup_arch start.\n");
 	unsigned long max_low_pfn;
 	

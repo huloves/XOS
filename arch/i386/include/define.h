@@ -3,4 +3,15 @@
 
 #define CONFIG_X86_32	1
 
+/* IO delay types */
+
+#define CONFIG_IO_DELAY_TYPE_0X80	0
+#define CONFIG_IO_DELAY_TYPE_0XED	1
+#define CONFIG_IO_DELAY_TYPE_UDELAY	2
+#define CONFIG_IO_DELAY_TYPE_NONE	3
+
+#define CONFIG_DEFAULT_IO_DELAY_TYPE	0
+
+/************/
+
 #endif /* I386_DEFINE_H */
