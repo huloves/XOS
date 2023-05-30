@@ -610,8 +610,8 @@ static void init_screen_info(void)
 	screen_info.orig_video_mode = 0x6A;	/* 800*600/4 (VESA) */
 	screen_info.orig_video_mode = 1;	/* 彩色模式 */
 	screen_info.orig_video_points = 8;	/* 字体大小信息 */
-	screen_info.orig_video_cols = 800;	/* 屏幕列信息 */
-	screen_info.orig_video_lines = 600;	/* 屏幕行信息 */
+	screen_info.orig_video_cols = 100;	/* 屏幕列信息 */
+	screen_info.orig_video_lines = 75;	/* 屏幕行信息 */
 }
 
 void setup_arch(void)
