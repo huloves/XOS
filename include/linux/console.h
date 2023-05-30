@@ -1,9 +1,16 @@
 #ifndef _LINUX_CONSOLE_H
 #define _LINUX_CONSOLE_H
 
-#include <linux/types.h>
+#include <asm/types.h>
+#include <linux/kd.h>
 
 struct vc_data;
+
+/**
+ * this is what the terminal answers to a ESC-Z or csi0c query.
+ */
+#define VT100ID "\033[?1;2c"
+#define VT102ID "\033[?6c"
 
 struct consw {
 	const char *(*con_startup)(void);

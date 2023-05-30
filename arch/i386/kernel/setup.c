@@ -12,6 +12,7 @@
 #include <asm/io.h>
 #include <asm/setup.h>
 #include <define.h>
+#include <linux/screen_info.h>
 
 /*
  * Machine setup..
@@ -21,6 +22,8 @@ char ignore_irq13;
 struct cpuinfo_x86 boot_cpu_data = { 0, 0, 0, 0, -1, 1, 0, 0, -1 };
 
 unsigned long mmu_cr4_features;   // extern in include/asm/processor.h
+
+struct screen_info screen_info;
 
 /* For PCI or other memory-mapped resources */
 unsigned long pci_mem_start = 0x10000000;
