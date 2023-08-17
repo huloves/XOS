@@ -9,3 +9,4 @@ kernel.bin
 test.c
 test.s
 *.o
+.config*
