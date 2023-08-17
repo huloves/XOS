@@ -10,3 +10,5 @@ test.c
 test.s
 *.o
 .config*
+./scripts/
+./tools/
