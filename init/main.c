@@ -22,7 +22,7 @@ static int init(void * unused);
 void start_kernel(void)
 {
     unsigned long mempages;
-    printk("Hello, OUROS.\n");
+    printk("Hello, XOS.\n");
     printk("init_all.\n");
     setup_arch();
     trap_init();
